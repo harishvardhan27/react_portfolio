@@ -4,7 +4,7 @@ A modern, responsive portfolio website built with React showcasing my projects, 
 
 ## 🚀 Live Demo
 
-[View Portfolio](https://your-netlify-url.netlify.app)
+[View Portfolio](https://marvelous-eclair-1639b1.netlify.app/)
 
 ## 🛠️ Built With
 
