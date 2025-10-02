@@ -8,7 +8,7 @@ const Projects = () => {
       description: "Built a smart-contract-driven system to ensure transparent fund distribution for government projects and private organizations. Features tender-based allocation and hierarchical fund circulation, preventing fraud and improving accountability.",
       technologies: ["Solidity", "Blockchain", "Web3"],
       status: "85% Completed",
-      soloProject: "Written, Directed & Coded by Harish Vardhan"
+      soloProject: "Conceptualized, designed, and implemented solely by me"
     },
     {
       title: "Cognitive Study Monitoring App",
@@ -24,7 +24,7 @@ const Projects = () => {
       description: "Designed an AI system to detect explicit content in multimedia uploads while streaming. Uses CNNs for video frames, DistilBERT for text detection, and Floyd's Two-Pointer approach for efficient scanning. Supports region-specific moderation policies.",
       technologies: ["Python", "DistilBERT", "CNN", "Floyd's Two-Pointer"],
       status: "In Development",
-      soloProject: "Written, Directed & Coded by Harish Vardhan"
+      soloProject: "Conceptualized, designed, and implemented solely by me"
     },
     {
       title: "PDF/Document Reader App",

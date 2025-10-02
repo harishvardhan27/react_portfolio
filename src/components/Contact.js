@@ -49,7 +49,7 @@ const Contact = () => {
                 <i className="fas fa-user-circle"></i>
                 <span>Codolio Profile</span>
               </a>
-              <a href="https://instagram.com/harishvardhan" className="contact-method" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.instagram.com/harish_vardhan27?igsh=MWNnaTF6Zzk2YjFsdQ==" className="contact-method" target="_blank" rel="noopener noreferrer">
                 <i className="fab fa-instagram"></i>
                 <span>Instagram Profile</span>
               </a>
