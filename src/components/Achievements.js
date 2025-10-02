@@ -28,7 +28,7 @@ const Achievements = () => {
     },
     {
       title: "Competitive Programming",
-      organization: "(Codechef-1530, Codeforces-1205)",
+      organization: "(Codechef-1600, Codeforces-1205)",
       icon: "fas fa-code",
       year: "2025"
     }

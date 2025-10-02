@@ -26,7 +26,7 @@ const Hero = () => {
         <div className="hero-image">
           <div className="profile-card">
             <div className="profile-img">
-              <i className="fas fa-user-circle"></i>
+              <img src="/profile.jpg" alt="Harish Vardhan" />
             </div>
             <div className="floating-icons">
               <i className="fab fa-python"></i>
