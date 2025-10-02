@@ -16,7 +16,7 @@ const Contact = () => {
         <div className="contact-content">
           <div className="contact-text">
             <h3>Let's Connect!</h3>
-            <p>I'm always excited to discuss new opportunities, collaborate on innovative projects, or simply chat about technology. Whether you're looking for a passionate developer, have an interesting project in mind, or want to explore potential partnerships, I'd love to hear from you.</p>
+            <p>I'm always excited to discuss new opportunities, collaborate on innovative projects, or simply chat about technology. If you're looking for someone to build modern, responsive websites or full-stack applications, and ML solutions, I'd love to help bring your ideas to life.</p>
             
             <div className="interests">
               <h4>Areas of Interest</h4>
@@ -46,8 +46,12 @@ const Contact = () => {
                 <span>GitHub Profile</span>
               </a>
               <a href="https://codolio.com/profile/Yugen27" className="contact-method" target="_blank" rel="noopener noreferrer">
-                <i className="fab fa-star"></i>
+                <i className="fas fa-user-circle"></i>
                 <span>Codolio Profile</span>
+              </a>
+              <a href="https://instagram.com/harishvardhan" className="contact-method" target="_blank" rel="noopener noreferrer">
+                <i className="fab fa-instagram"></i>
+                <span>Instagram Profile</span>
               </a>
               <a href="tel:+91 97900 16953" className="contact-method">
                 <i className="fas fa-phone"></i>
@@ -57,8 +61,13 @@ const Contact = () => {
             
             <div className="cta-section">
               <h4>Ready to Collaborate?</h4>
-              <p>I'm currently open to internship opportunities, freelance projects, and full-time positions in software development and AI.</p>
-              <a href="mailto:harishvardhanwd@gmail.com" className="btn-primary">Send Message</a>
+              <p>I'm currently open for freelancing! Available for internship opportunities, freelance projects, and full-time positions in software development and AI.</p>
+              <div style={{display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap'}}>
+                <a href="mailto:harishvardhanwd@gmail.com" className="btn-primary">Send Message</a>
+                <a href="/resume.pdf" className="btn-secondary" download="Harish_Vardhan_Resume.pdf">
+                  <i className="fas fa-download"></i> Download Resume
+                </a>
+              </div>
             </div>
           </div>
         </div>

@@ -18,6 +18,9 @@ const Hero = () => {
           <div className="hero-buttons">
             <a href="#projects" className="btn-primary" onClick={() => scrollToSection('projects')}>View My Work</a>
             <a href="#contact" className="btn-secondary" onClick={() => scrollToSection('contact')}>Get In Touch</a>
+            <a href="/resume.pdf" className="btn-secondary" download="Harish_Vardhan_Resume.pdf">
+              <i className="fas fa-download"></i> Download Resume
+            </a>
           </div>
         </div>
         <div className="hero-image">

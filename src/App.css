@@ -403,6 +403,16 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: #1f2937;
 }
 
+/* Dark section titles */
+.about .section-title,
+.skills .section-title,
+.projects .section-title,
+.achievements .section-title,
+.contact .section-title {
+    color: #f1f5f9;
+    text-shadow: 0 0 20px rgba(241, 245, 249, 0.3);
+}
+
 /* About Section */
 .about {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
