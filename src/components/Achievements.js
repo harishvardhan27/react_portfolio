@@ -27,8 +27,8 @@ const Achievements = () => {
       year: "2024"
     },
     {
-      title: "Competitive Programming",
-      organization: "(Codechef-1600, Codeforces-1205)",
+      title: "Competitive Programming & DSA",
+      organization: "(Codechef-1600, Codeforces-1205, Leetcode-1651)",
       icon: "fas fa-code",
       year: "2025"
     }

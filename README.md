@@ -72,8 +72,8 @@ npm run build
 
 ## 📧 Contact
 
-- Email: [your-email@example.com]
-- LinkedIn: [Your LinkedIn Profile]
+- Email: [harishvardhanwd@gmail.com]
+- LinkedIn: [www.linkedin.com/in/harishvardhan27]
 - GitHub: [harishvardhan27](https://github.com/harishvardhan27)
 
 ## 📄 License
