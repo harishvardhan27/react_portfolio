@@ -51,33 +51,6 @@ const Coding = () => {
     }
   };
 
-  const generateHeatmapData = () => {
-    const days = [];
-    const startDate = new Date('2025-01-01');
-    const today = new Date();
-    
-    for (let i = 0; i < 365; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      
-      if (date <= today) {
-        days.push({
-          date: date.toISOString().split('T')[0],
-          count: Math.floor(Math.random() * 5),
-          day: i
-        });
-      } else {
-        days.push({
-          date: date.toISOString().split('T')[0],
-          count: 0,
-          day: i
-        });
-      }
-    }
-    return days;
-  };
-
-  const heatmapData = generateHeatmapData();
 
   if (loading) {
     return (
