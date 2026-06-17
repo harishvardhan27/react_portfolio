@@ -1,4 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 600);
+  const handler = useCallback(() => setIsMobile(window.innerWidth < 600), []);
+  useEffect(() => {
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, [handler]);
+  return isMobile;
+}
 
 function useVisible(threshold = 0.15) {
   const ref = useRef(null);
@@ -74,6 +84,7 @@ function HighlightTag({ label, color }) {
 
 function InternCard({ intern, index, sectionVisible }) {
   const [hovered, setHovered] = useState(false);
+  const isMobile = useIsMobile();
   const delay = `${0.1 + index * 0.18}s`;
 
   return (
@@ -101,11 +112,12 @@ function InternCard({ intern, index, sectionVisible }) {
 
       <div style={{
         display: "flex",
-        gap: 20,
+        flexDirection: isMobile ? "column" : "row",
+        gap: isMobile ? 12 : 20,
         position: "relative",
         zIndex: 1,
       }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+        <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", alignItems: "center", flexShrink: 0, gap: isMobile ? 12 : 0 }}>
           <div style={{
             width: 56, height: 56, borderRadius: 16,
             background: hovered
@@ -147,7 +159,8 @@ function InternCard({ intern, index, sectionVisible }) {
           }} />
 
           <div style={{
-            display: "flex", flexWrap: "wrap",
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between", alignItems: "flex-start",
             gap: 10, marginBottom: 14,
           }}>
@@ -161,13 +174,13 @@ function InternCard({ intern, index, sectionVisible }) {
                   width: 6, height: 6, borderRadius: "50%", background: intern.color,
                   animation: "pulse 2s infinite",
                 }} />
-                <span style={{ fontSize: 14, color: intern.color, letterSpacing: "0.14em", fontFamily: "'JetBrains Mono', monospace" }}>
+                <span style={{ fontSize: 13, color: intern.color, letterSpacing: "0.1em", fontFamily: "'JetBrains Mono', monospace" }}>
                   {intern.tag} · {intern.status}
                 </span>
               </div>
 
               <h3 style={{
-                fontSize: "clamp(16px, 2.5vw, 20px)",
+                fontSize: "clamp(15px, 2.5vw, 20px)",
                 fontWeight: 900, color: "#f0ece4",
                 fontFamily: "'Syne', sans-serif",
                 letterSpacing: "-0.02em", lineHeight: 1.15,
@@ -175,9 +188,10 @@ function InternCard({ intern, index, sectionVisible }) {
               }}>{intern.position}</h3>
 
               <div style={{
-                fontSize: 14, color: "#e2e8f0",
+                fontSize: 13, color: "#e2e8f0",
                 fontFamily: "'Syne', sans-serif",
                 fontWeight: 700, letterSpacing: "0.01em",
+                wordBreak: "break-word",
               }}>{intern.company}</div>
             </div>
 
@@ -185,12 +199,14 @@ function InternCard({ intern, index, sectionVisible }) {
               background: "#0a0e1a", border: `1px solid #1a2238`,
               borderRadius: 10, padding: "8px 14px",
               textAlign: "center", flexShrink: 0,
+              alignSelf: isMobile ? "flex-start" : "flex-start",
             }}>
               <div style={{
-                fontSize: 14, fontWeight: 800, color: "#c8d0e4",
+                fontSize: 13, fontWeight: 800, color: "#c8d0e4",
                 fontFamily: "'Syne', sans-serif", lineHeight: 1, marginBottom: 3,
+                whiteSpace: "nowrap",
               }}>{intern.period}</div>
-              <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.15em" }}>DURATION</div>
+              <div style={{ fontSize: 11, color: "#94a3b8", letterSpacing: "0.15em" }}>DURATION</div>
             </div>
           </div>
 
