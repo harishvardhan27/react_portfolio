@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 // ── CONFIRMED REAL DATA ───────────────────────────────────────────────────────
 const HARISH_DATA = {
@@ -215,6 +215,7 @@ function TopAccent({ color }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // CODECHEF CARD
 // ─────────────────────────────────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 function CodeChefCard({ data, meta }) {
   return (
     <div style={{
@@ -530,6 +531,7 @@ function CodeforcesCard({ data, meta }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Star level colour mapping
+// eslint-disable-next-line no-unused-vars
 const HR_LEVEL_COLORS = { 1: "#CD7F32", 2: "#CD7F32", 3: "#C0C0C0", 4: "#C0C0C0", 5: "#FFD700" };
 
 function HRBadge({ badge, accentColor }) {
@@ -568,6 +570,7 @@ function HRBadge({ badge, accentColor }) {
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 function HackerRankCard({ data, meta }) {
   const badges     = data.badges     || [];
   const totalStars = data.totalStars || badges.reduce((s, b) => s + (b.stars || 0), 0);
@@ -719,6 +722,7 @@ function HackerRankCard({ data, meta }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // GENERIC LIVE CARD  (GFG, CodeStudio)
 // ─────────────────────────────────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 function GenericLiveCard({ data, pkey, meta }) {
   const cc = data?.solved?.total || 0;
   const extras = [];
@@ -865,6 +869,7 @@ function PendingCard({ platform, pkey, meta }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // SUMMARY BANNER
 // ─────────────────────────────────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 function SummaryBanner({ platformData, loading, mounted }) {
   const liveTotal = Object.values(platformData).reduce((s, p) => s + (p?.solved?.total || 0), 0);
   const total = HARISH_DATA.codechef.solved.total + liveTotal;
@@ -1045,7 +1050,9 @@ export default function Coding() {
     fetchAll();
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
   const otherPlatforms = ["gfg", "codestudio"];
+  // eslint-disable-next-line no-unused-vars
   const featuredPlatforms = ["codechef", "leetcode", "codeforces", "gfg", "hackerrank", "codestudio"];
 
   return (
