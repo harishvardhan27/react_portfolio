@@ -246,29 +246,31 @@ function ProjectCard({ project, index, visible, onClick }) {
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{
-              fontSize: "clamp(15px, 2vw, 18px)", fontWeight: 900,
-              color: "#f0ece4", fontFamily: "'Syne', sans-serif",
-              letterSpacing: "-0.02em", lineHeight: 1.1, marginBottom: 3,
-            }}>{project.title}</h3>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 3 }}>
+              <h3 style={{
+                fontSize: "clamp(15px, 2vw, 18px)", fontWeight: 900,
+                color: "#f0ece4", fontFamily: "'Syne', sans-serif",
+                letterSpacing: "-0.02em", lineHeight: 1.1, margin: 0,
+                minWidth: 0, wordBreak: "break-word",
+              }}>{project.title}</h3>
+              <div style={{
+                background: `${sm.color}10`, border: `1px solid ${sm.color}30`,
+                borderRadius: 20, padding: "3px 10px",
+                display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
+              }}>
+                {sm.dot && (
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: sm.color, animation: "pulse 2s infinite" }} />
+                )}
+                <span style={{ fontSize: 9, color: sm.color, letterSpacing: "0.12em", fontFamily: "'JetBrains Mono', monospace" }}>
+                  {sm.label}
+                </span>
+              </div>
+            </div>
             <div style={{
               fontSize: 11, color: `${project.color}aa`,
               fontFamily: "'JetBrains Mono', monospace",
               letterSpacing: "0.03em", lineHeight: 1.3,
             }}>{project.subtitle}</div>
-          </div>
-
-          <div style={{
-            background: `${sm.color}10`, border: `1px solid ${sm.color}30`,
-            borderRadius: 20, padding: "3px 10px",
-            display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
-          }}>
-            {sm.dot && (
-              <div style={{ width: 5, height: 5, borderRadius: "50%", background: sm.color, animation: "pulse 2s infinite" }} />
-            )}
-            <span style={{ fontSize: 9, color: sm.color, letterSpacing: "0.12em", fontFamily: "'JetBrains Mono', monospace" }}>
-              {sm.label}
-            </span>
           </div>
         </div>
 
