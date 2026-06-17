@@ -8,11 +8,13 @@
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 80px;
+    font-size: 17px;
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    line-height: 1.6;
+    font-size: 1rem;
+    line-height: 1.7;
     color: #333;
     overflow-x: hidden;
 }
@@ -133,7 +135,7 @@ body {
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 500;
     white-space: nowrap;
     z-index: 1000;
@@ -631,7 +633,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: #e2e8f0;
     padding: 0.7rem 1.2rem;
     border-radius: 25px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
@@ -769,7 +771,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: #86efac;
     padding: 0.5rem 1rem;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.98rem;
     font-weight: 600;
     border: 1px solid rgba(34, 197, 94, 0.3);
     transition: all 0.3s ease;
@@ -789,7 +791,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
 
 .project-contributors strong {
     color: #f1f5f9;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-bottom: 0.8rem;
     display: block;
 }
@@ -805,7 +807,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: #c4b5fd;
     padding: 0.4rem 0.8rem;
     border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 500;
     border: 1px solid rgba(139, 92, 246, 0.3);
     transition: all 0.3s ease;
@@ -822,7 +824,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: #fcd34d;
     padding: 0.4rem 0.8rem;
     border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 500;
     border: 1px solid rgba(251, 191, 36, 0.3);
     transition: all 0.3s ease;
@@ -839,7 +841,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     background: rgba(34, 197, 94, 0.1);
     border-left: 4px solid #22c55e;
     border-radius: 10px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #a7f3d0;
     position: relative;
     z-index: 1;
@@ -948,7 +950,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 700;
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
     z-index: 2;
@@ -1089,7 +1091,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
 
 .timeline-date {
     color: #6b7280;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-bottom: 1rem;
 }
 
@@ -1136,7 +1138,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: white;
     padding: 0.4rem 1rem;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 600;
     box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
     z-index: 2;
@@ -1162,7 +1164,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
     color: #a5b4fc;
     padding: 0.4rem 0.8rem;
     border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 500;
     border: 1px solid rgba(59, 130, 246, 0.3);
     transition: all 0.3s ease;
@@ -1500,7 +1502,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
 
 .stat-badge .stat-label {
     color: #cbd5e1;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
 }
 
@@ -1647,7 +1649,7 @@ section.visible .achievements-grid > *:nth-child(4) { animation-delay: 0.4s; }
 
 .stat-name {
     color: #cbd5e1;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
 }
 
