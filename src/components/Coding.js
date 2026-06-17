@@ -1,4 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const handler = useCallback(() => setIsMobile(window.innerWidth < 640), []);
+  useEffect(() => {
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, [handler]);
+  return isMobile;
+}
 
 // ── CONFIRMED REAL DATA ───────────────────────────────────────────────────────
 const HARISH_DATA = {
@@ -309,23 +319,23 @@ function LeetCodeCard({ data, meta }) {
       <CardHeader platform="LeetCode" username={data.username} profileUrl={data.profileUrl} meta={meta} />
 
       {/* Hero row — total solved + contest rating */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>PROBLEMS SOLVED</div>
-          <div style={{ fontSize: 48, fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
+          <div style={{ fontSize: 13, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>PROBLEMS SOLVED</div>
+          <div style={{ fontSize: "clamp(36px,8vw,48px)", fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
             {total}
           </div>
-          <div style={{ fontSize: 14, color: "#fcd34d", marginTop: 3 }}>
+          <div style={{ fontSize: 13, color: "#fcd34d", marginTop: 3 }}>
             Rank #{(data.globalRanking || 0).toLocaleString()}
           </div>
         </div>
         {contest && (
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>CONTEST RATING</div>
-            <div style={{ fontSize: 38, fontWeight: 900, color: "#f0ddb0", fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
+            <div style={{ fontSize: 13, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>CONTEST RATING</div>
+            <div style={{ fontSize: "clamp(28px,7vw,38px)", fontWeight: 900, color: "#f0ddb0", fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
               {contest.rating}
             </div>
-            <div style={{ fontSize: 14, color: "#fcd34d", marginTop: 3 }}>
+            <div style={{ fontSize: 13, color: "#fcd34d", marginTop: 3 }}>
               Top {contest.topPercentage}%
             </div>
           </div>
@@ -461,30 +471,30 @@ function CodeforcesCard({ data, meta }) {
       </CardHeader>
 
       {/* Hero: solved + current rating */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.15em", marginBottom: 4 }}>PROBLEMS SOLVED</div>
-          <div style={{ fontSize: 48, fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
+          <div style={{ fontSize: 13, color: "#94a3b8", letterSpacing: "0.15em", marginBottom: 4 }}>PROBLEMS SOLVED</div>
+          <div style={{ fontSize: "clamp(36px,8vw,48px)", fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
             {data.solved?.total || 0}
           </div>
-          <div style={{ fontSize: 14, color: "#94a3b8", marginTop: 3 }}>
+          <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 3 }}>
             Max rank <span style={{ color: rankColor }}>{data.maxRank}</span>
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.15em", marginBottom: 4 }}>CURRENT RATING</div>
-          <div style={{ fontSize: 38, fontWeight: 900, color: rankColor, fontFamily: "'Syne',sans-serif", lineHeight: 1,
+          <div style={{ fontSize: 13, color: "#94a3b8", letterSpacing: "0.15em", marginBottom: 4 }}>CURRENT RATING</div>
+          <div style={{ fontSize: "clamp(28px,7vw,38px)", fontWeight: 900, color: rankColor, fontFamily: "'Syne',sans-serif", lineHeight: 1,
             textShadow: `0 0 24px ${rankColor}44` }}>
             {data.rating || 0}
           </div>
-          <div style={{ fontSize: 14, color: "#94a3b8", marginTop: 3 }}>Peak {data.maxRating || 0}</div>
+          <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 3 }}>Peak {data.maxRating || 0}</div>
         </div>
       </div>
 
       <RatingBar current={data.rating || 0} highest={data.maxRating || 0} max={3500} color={rankColor} />
 
       {/* Contest stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 7, marginTop: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 7, marginTop: 14 }}>
         <StatBox label="CONTESTS"   value={data.contests?.count    || 0}  color={meta.color} />
         <StatBox label="BEST RANK"  value={data.contests?.bestRank  ? `#${data.contests.bestRank.toLocaleString()}` : "—"} color={meta.color} />
         <StatBox label="MAX GAIN"   value={data.contests?.maxRatingGain > 0 ? `+${data.contests.maxRatingGain}` : "—"} color="#2DB526" />
@@ -956,6 +966,7 @@ function SummaryBanner({ platformData, loading, mounted }) {
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000/api";
 
 export default function Coding() {
+  const isMobile = useIsMobile();
   const [mounted,      setMounted]      = useState(false);
   const [platformData, setPlatformData] = useState({});
   const [loading,      setLoading]      = useState(true);
@@ -1116,7 +1127,7 @@ export default function Coding() {
         </div>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2,1fr)",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(2,1fr)",
           gap: 16, marginBottom: 28,
           alignItems: "stretch",
         }}>
