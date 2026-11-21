@@ -1,0 +1,45 @@
+name: Refresh coding stats
+
+# Re-fetches LeetCode, Codeforces, CodeChef, GeeksforGeeks, HackerRank,
+# CodeStudio and AtCoder stats into public/coding-stats.json.
+# Commits only when a stat actually changed; that push triggers the normal
+# Netlify deploy, so the live site stays current without a backend.
+
+on:
+  schedule:
+    - cron: "30 0,12 * * *" # twice a day: 06:00 and 18:00 IST
+  workflow_dispatch: {} # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-coding-stats
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # The script uses only Node built-ins, so no npm install is needed.
+      - name: Fetch latest stats
+        run: node scripts/fetch-coding-stats.js
+
+      - name: Commit if anything changed
+        run: |
+          if git diff --quiet -- public/coding-stats.json; then
+            echo "No stat changed since the last snapshot; nothing to deploy."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/coding-stats.json
+          git commit -m "chore: refresh coding profile stats"
+          git push

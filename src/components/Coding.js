@@ -1,14 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
-  const handler = useCallback(() => setIsMobile(window.innerWidth < 640), []);
-  useEffect(() => {
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, [handler]);
-  return isMobile;
-}
+import { useState, useEffect, useRef } from "react";
+import { SectionHead, HandArrow, prefersReducedMotion } from "./ui";
 
 // ── CONFIRMED REAL DATA ───────────────────────────────────────────────────────
 const HARISH_DATA = {
@@ -90,437 +81,290 @@ const MOCK_LEETCODE = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SHARED PRIMITIVES
+// NOTEBOOK PRIMITIVES — stats drawn in ink on graph paper
 // ─────────────────────────────────────────────────────────────────────────────
+// Profiles added after the original data block
+const EXTRA_PROFILES = {
+  atcoder: { platform: "AtCoder", username: "HarishVardhan27", profileUrl: "https://atcoder.jp/users/HarishVardhan27", text: "AC" },
+};
 
-function CountUp({ to, duration = 1400 }) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    if (!to) return;
-    let start = 0;
-    const step = to / (duration / 16);
-    const t = setInterval(() => {
-      start = Math.min(start + step, to);
-      setVal(Math.floor(start));
-      if (start >= to) clearInterval(t);
-    }, 16);
-    return () => clearInterval(t);
-  }, [to, duration]);
-  return <>{val.toLocaleString()}</>;
-}
+const fmtTime = (d) => new Date(d).toLocaleTimeString();
+const pct = (v, max) => `${Math.max(0, Math.min(100, (v / max) * 100))}%`;
 
-function StarRating({ count, max = 7, color }) {
+// Official Codeforces rating ladder
+const CF_LADDER = [
+  { name: "newbie", from: 0, to: 1200 },
+  { name: "pupil", from: 1200, to: 1400 },
+  { name: "specialist", from: 1400, to: 1600 },
+  { name: "expert", from: 1600, to: 1900 },
+  { name: "candidate master", from: 1900, to: 2100 },
+  { name: "master", from: 2100, to: 2300 },
+  { name: "international master", from: 2300, to: 2400 },
+  { name: "grandmaster", from: 2400, to: 2600 },
+  { name: "international grandmaster", from: 2600, to: 3000 },
+  { name: "legendary grandmaster", from: 3000, to: 3500 },
+];
+
+/* Hand-drawn ink loop around a number */
+function Circled({ children }) {
   return (
-    <div style={{ display: "flex", gap: 2 }}>
-      {Array.from({ length: max }).map((_, i) => (
-        <svg key={i} width="12" height="12" viewBox="0 0 24 24"
-          fill={i < count ? color : "none"} stroke={color} strokeWidth="1.5"
-          style={{ opacity: i < count ? 1 : 0.22 }}>
-          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-        </svg>
-      ))}
-    </div>
+    <span className="circled">
+      {children}
+      <svg className="circled__ink" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+        <path pathLength="1" d="M104 7C52 3 9 22 7 50c-2 30 46 45 102 43 52-2 86-19 84-45C191 22 152 6 98 10" />
+      </svg>
+    </span>
   );
 }
 
-function RatingBar({ current, highest, max = 3000, color }) {
-  const pct  = Math.min((current / max) * 100, 100);
-  const hpct = Math.min((highest / max) * 100, 100);
+function Ann({ children, className = "" }) {
   return (
-    <div style={{ marginTop: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-        <span style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.1em" }}>PROGRESS /{max}</span>
-        <span style={{ fontSize: 14, color }}>Peak: {highest}</span>
-      </div>
-      <div style={{ position: "relative", height: 5, background: "#0a0e18", borderRadius: 3 }}>
-        <div style={{ position: "absolute", left: `${hpct}%`, top: -4, width: 2, height: 13, background: `${color}55`, borderRadius: 1 }} />
-        <div style={{ width: `${pct}%`, height: "100%", background: `linear-gradient(90deg,${color}44,${color})`, borderRadius: 3, transition: "width 1.8s ease" }} />
-      </div>
-    </div>
+    <p className={`note nb__ann ${className}`}>
+      <HandArrow />
+      <span>{children}</span>
+    </p>
   );
 }
 
-// Slim horizontal bar used for difficulty / beats breakdown
-function SegmentBar({ segments }) {
-  // segments: [{ pct, color, label }]
+/* A ruler on graph paper: ticks, optional rank bands, peak + current marks */
+function Ruler({ value, peak, max, step, bands, current, label, suffix = "" }) {
+  const ticks = [];
+  for (let t = 0; t <= max; t += step) ticks.push(t);
   return (
-    <div style={{ display: "flex", height: 5, borderRadius: 4, overflow: "hidden", gap: 1 }}>
-      {segments.map((s, i) => (
-        <div key={i} style={{ flex: s.pct, background: s.color, transition: "flex 1.5s ease", borderRadius: 2 }} />
-      ))}
-    </div>
-  );
-}
-
-function LiveBadge({ color = "#2DB526" }) {
-  return (
-    <div style={{
-      position: "absolute", top: 14, right: 14,
-      background: `${color}12`, border: `1px solid ${color}40`,
-      borderRadius: 20, padding: "3px 9px",
-      display: "flex", alignItems: "center", gap: 5,
-    }}>
-      <div style={{ width: 5, height: 5, borderRadius: "50%", background: color, animation: "livePulse 1.5s infinite" }} />
-      <span style={{ fontSize: 14, color, letterSpacing: "0.15em" }}>LIVE</span>
-    </div>
-  );
-}
-
-function StatBox({ label, value, sub, color, large = false }) {
-  return (
-    <div style={{
-      background: `${color}08`, border: `1px solid ${color}22`,
-      borderRadius: 10, padding: large ? "14px 10px" : "10px 8px", textAlign: "center",
-    }}>
-      <div style={{ fontSize: large ? 24 : 18, fontWeight: 800, color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-        {value ?? "—"}
-      </div>
-      <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.12em", marginTop: 3 }}>{label}</div>
-      {sub && <div style={{ fontSize: 14, color: "#cbd5e1", marginTop: 1 }}>{sub}</div>}
-    </div>
-  );
-}
-
-function PlatformIcon({ text, color, bg }) {
-  return (
-    <div style={{
-      width: 48, height: 48, borderRadius: 13, flexShrink: 0,
-      background: `linear-gradient(135deg,${bg},${color}22)`,
-      border: `1px solid ${color}45`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: 14, fontWeight: 800, color, fontFamily: "'JetBrains Mono',monospace",
-    }}>{text}</div>
-  );
-}
-
-function CardHeader({ platform, username, profileUrl, meta, children }) {
-  return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 20 }}>
-      <PlatformIcon text={meta.text} color={meta.color} bg={meta.bg} />
-      <div style={{ flex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 16, fontWeight: 800, color: "#f0e8d8", fontFamily: "'Syne',sans-serif" }}>
-            {platform}
+    <div className="ruler">
+      {label && <div className="ruler__label"><span>{label}</span>{peak !== undefined && <span>Peak: <b className="ruler__num">{peak}</b></span>}</div>}
+      <div className={`ruler__body ${bands ? "ruler__body--bands" : ""}`}>
+        <div className="ruler__line">
+          {ticks.map((t, i) => (
+            <span key={t} className={`ruler__tick ${i === 0 ? "is-first" : ""} ${i === ticks.length - 1 ? "is-last" : ""}`} style={{ left: pct(t, max) }}><i>{t}</i></span>
+          ))}
+          {peak !== undefined && peak !== value && (
+            <span className="ruler__peak" style={{ left: pct(peak, max) }} aria-hidden="true" />
+          )}
+          <span className="ruler__mark" style={{ "--to": pct(value, max) }}>
+            <b>{value}{suffix}</b>
           </span>
-          {children}
         </div>
-        <a href={profileUrl} target="_blank" rel="noopener noreferrer"
-          style={{ color: `${meta.color}bb`, fontSize: 16, fontFamily: "'JetBrains Mono',monospace", textDecoration: "none", letterSpacing: "0.05em" }}>
-          @{username} ↗
-        </a>
+        {bands && (
+          <div className="ruler__bands" aria-hidden="true">
+            {bands.map((b, i) => (
+              <span key={b.name} className={`ruler__band ${b.name === current ? "is-current" : ""} ${i % 2 ? "is-alt" : ""}`}
+                style={{ left: pct(b.from, max), width: pct(b.to - b.from, max) }}>
+                {b.name === current && <em>{b.name}</em>}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function TopAccent({ color }) {
+function StatLine({ items }) {
   return (
-    <div style={{
-      position: "absolute", top: 0, left: "12%", right: "12%", height: 2,
-      background: `linear-gradient(90deg,transparent,${color},transparent)`,
-    }} />
+    <p className="nb__line">
+      {items.map((it, i) => (
+        <span key={it.label}>
+          <b className="display">{it.value ?? "—"}</b> {it.label.toLowerCase()}{i < items.length - 1 ? ", " : "."}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+const freshness = (d) => (d?._mock
+  ? "Demo data"
+  : d?._snapshot
+    ? `Updated ${new Date(d.lastUpdated).toLocaleDateString(undefined, { day: "numeric", month: "short" })}`
+    : "Live");
+
+function NbHead({ platform, username, profileUrl, mock, data, live = true, children }) {
+  const label = data ? freshness(data) : mock ? "Demo data" : "Live";
+  const isLive = label === "Live";
+  return (
+    <header className="nb__head">
+      <h3 className="display nb__name">{platform}</h3>
+      {children}
+      <a href={profileUrl} target="_blank" rel="noopener noreferrer" className="nb__user">@{username}</a>
+      {live && (
+        <span className={`note nb__status ${isLive ? "" : "is-mock"}`}>
+          <span className={isLive ? "live-dot" : "nb__dot"} aria-hidden="true" />{label}
+        </span>
+      )}
+    </header>
+  );
+}
+
+function NbFoot({ data, short }) {
+  return (
+    <p className="nb__foot">
+      <span>Data fetched {data._mock ? "(demo data)" : data._snapshot ? `${new Date(data.lastUpdated).toLocaleDateString()} (build snapshot)` : `${fmtTime(data.lastUpdated)} (live)`}</span>
+      {data._mock && <span className="note">{short ? "Mock" : "Mock — run npm run stats to fetch real data"}</span>}
+    </p>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CODECHEF CARD
+// CODECHEF (not rendered — kept for future use)
 // ─────────────────────────────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
-function CodeChefCard({ data, meta }) {
+function CodeChefCard({ data }) {
   return (
-    <div style={{
-      background: `linear-gradient(140deg,#0e0a02 0%,#1a1208 60%,#120e04 100%)`,
-      border: `1px solid ${meta.color}28`, borderRadius: 20, padding: 26,
-      position: "relative", overflow: "hidden",
-      boxShadow: `0 4px 48px ${meta.glow}`,
-    }}>
-      <TopAccent color={meta.color} />
-      <LiveBadge color="#2DB526" />
-      <CardHeader platform="CodeChef" username={data.username} profileUrl={data.profileUrl} meta={meta}>
-        <StarRating count={data.stars} max={7} color={meta.color} />
-      </CardHeader>
-
-      {/* Solved hero */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-        <div>
-          <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>PROBLEMS SOLVED</div>
-          <div style={{ fontSize: 48, fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-            {data.solved.total}
-          </div>
-          <div style={{ fontSize: 14, color: "#cbd5e1", marginTop: 3 }}>{data.division}</div>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>CURRENT RATING</div>
-          <div style={{ fontSize: 38, fontWeight: 900, color: "#f0ddb0", fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-            {data.rating}
-          </div>
-          <div style={{ fontSize: 14, color: "#fcd34d", marginTop: 3 }}>Peak {data.highestRating}</div>
-        </div>
+    <article className="nb">
+      <NbHead platform="CodeChef" username={data.username} profileUrl={data.profileUrl} mock={false}>
+        <span className="nb__chip">{data.stars}★ · {data.division}</span>
+      </NbHead>
+      <div className="nb__hero">
+        <div><Circled><strong className="display nb__big">{data.solved.total}</strong></Circled><Ann>problems solved</Ann></div>
+        <div className="r"><strong className="display nb__mid">{data.rating}</strong><p className="nb__sub">Current rating, peak {data.highestRating}</p></div>
       </div>
-
-      <RatingBar current={data.rating} highest={data.highestRating} max={3000} color={meta.color} />
-
-      {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 14 }}>
-        <StatBox label="CONTESTS" value={data.contests} sub="participated" color={meta.color} />
-        <StatBox label="GLOBAL RANK" value={`#${data.globalRank.toLocaleString()}`} color={meta.color} />
-        <StatBox label="INDIA RANK" value={`#${data.countryRank.toLocaleString()}`} color={meta.color} />
-      </div>
-
-      {/* Badges */}
-      <div style={{ marginTop: 14, display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {data.badges.map((b, i) => (
-          <span key={i} style={{
-            background: `${meta.color}10`, border: `1px solid ${meta.color}28`,
-            color: `${meta.color}bb`, borderRadius: 5, padding: "3px 9px",
-            fontSize: 14, letterSpacing: "0.08em", fontFamily: "'JetBrains Mono',monospace",
-          }}>🏅 {b}</span>
-        ))}
-      </div>
-
-      <div style={{ marginTop: 12, fontSize: 14, color: "#94a3b8", fontFamily: "'JetBrains Mono',monospace" }}>
-        DATA FETCHED · {data.lastUpdated}
-      </div>
-    </div>
+      <Ruler value={data.rating} peak={data.highestRating} max={3000} step={500} label="Progress /3000" />
+      <StatLine items={[
+        { label: "Contests participated", value: data.contests },
+        { label: "Global rank", value: `#${data.globalRank.toLocaleString()}` },
+        { label: "India rank", value: `#${data.countryRank.toLocaleString()}` },
+      ]} />
+      <ul className="tags">{data.badges.map((b, i) => <li key={i} className="tag">{b}</li>)}</ul>
+      <p className="nb__foot"><span>Data fetched {data.lastUpdated}</span></p>
+    </article>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LEETCODE CARD  — mirrors CodeChef quality with LC-specific data
+// LEETCODE
 // ─────────────────────────────────────────────────────────────────────────────
-function LeetCodeCard({ data, meta }) {
+function LeetCodeCard({ data }) {
   const { solved, beats, contest } = data;
   const total  = solved?.total  || 0;
   const easy   = solved?.easy   || 0;
   const medium = solved?.medium || 0;
   const hard   = solved?.hard   || 0;
-
-  // Difficulty bar segments proportional to count
-  const diffSegs = [
-    { pct: easy   || 1, color: "#00B8A3", label: "Easy"   },
-    { pct: medium || 1, color: "#FFC01E", label: "Medium" },
-    { pct: hard   || 1, color: "#FF375F", label: "Hard"   },
+  const contestRating = contest?.rating || 0;
+  const split = [
+    { label: "Easy", count: easy, cls: "is-easy" },
+    { label: "Medium", count: medium, cls: "is-medium" },
+    { label: "Hard", count: hard, cls: "is-hard" },
   ];
 
-  // Contest rating progress (max 3500 for LC)
-  const contestRating = contest?.rating || 0;
-
   return (
-    <div style={{
-      background: `linear-gradient(140deg,#0e0a00 0%,#1a1100 60%,#130f02 100%)`,
-      border: `1px solid ${meta.color}28`, borderRadius: 20, padding: 26,
-      position: "relative", overflow: "hidden",
-      boxShadow: `0 4px 48px ${meta.glow}`,
-      flex: 1, display: "flex", flexDirection: "column",
-    }}>
-      <TopAccent color={meta.color} />
-      <LiveBadge color={meta.color} />
+    <article className="nb">
+      <NbHead platform="LeetCode" username={data.username} profileUrl={data.profileUrl} data={data}>
+        {contest?.badge && <span className="nb__chip">{contest.badge}</span>}
+      </NbHead>
 
-      <CardHeader platform="LeetCode" username={data.username} profileUrl={data.profileUrl} meta={meta} />
-
-      {/* Hero row — total solved + contest rating */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+      <div className="nb__hero">
         <div>
-          <div style={{ fontSize: 13, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>PROBLEMS SOLVED</div>
-          <div style={{ fontSize: "clamp(36px,8vw,48px)", fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-            {total}
-          </div>
-          <div style={{ fontSize: 13, color: "#fcd34d", marginTop: 3 }}>
-            Rank #{(data.globalRanking || 0).toLocaleString()}
-          </div>
+          <Circled><strong className="display nb__big">{total}</strong></Circled>
+          <Ann>problems solved</Ann>
+          <p className="nb__sub">Rank #{(data.globalRanking || 0).toLocaleString()}</p>
         </div>
         {contest && (
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 13, color: "#cbd5e1", letterSpacing: "0.15em", marginBottom: 4 }}>CONTEST RATING</div>
-            <div style={{ fontSize: "clamp(28px,7vw,38px)", fontWeight: 900, color: "#f0ddb0", fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-              {contest.rating}
-            </div>
-            <div style={{ fontSize: 13, color: "#fcd34d", marginTop: 3 }}>
-              Top {contest.topPercentage}%
-            </div>
+          <div className="r">
+            <strong className="display nb__mid nb__hl">{contest.rating}</strong>
+            <p className="note">contest rating</p>
+            <p className="nb__sub">Top {contest.topPercentage}%</p>
           </div>
         )}
       </div>
 
-      {/* Difficulty breakdown bar */}
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.12em", marginBottom: 7 }}>DIFFICULTY SPLIT</div>
-        <SegmentBar segments={diffSegs} />
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 7 }}>
-          {[
-            { label: "Easy",   count: easy,   color: "#00B8A3" },
-            { label: "Medium", count: medium, color: "#FFC01E" },
-            { label: "Hard",   count: hard,   color: "#FF375F" },
-          ].map((d) => (
-            <div key={d.label} style={{ textAlign: "center", flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: d.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-                {d.count}
-              </div>
-              <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.1em", marginTop: 2 }}>{d.label}</div>
+      <div className="nb__block">
+        <h4 className="nb__label">Difficulty split</h4>
+        <div className="split">
+          {split.map((d) => (
+            <div key={d.label} className={`split__seg ${d.cls}`} style={{ flexGrow: d.count || 1 }}>
+              <span className="split__bar" />
+              <span className="split__lbl"><b className="display">{d.count}</b> {d.label}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Beats percentile row */}
       {beats && (beats.easy || beats.medium || beats.hard) && (
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.12em", marginBottom: 8 }}>BEATS % (users outperformed)</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+        <div className="nb__block">
+          <h4 className="nb__label">Beats % (users outperformed)</h4>
+          <div className="beats">
             {[
-              { label: "EASY",   val: beats.easy,   color: "#00B8A3" },
-              { label: "MEDIUM", val: beats.medium, color: "#FFC01E" },
-              { label: "HARD",   val: beats.hard,   color: "#FF375F" },
+              { label: "Easy", val: beats.easy },
+              { label: "Medium", val: beats.medium },
+              { label: "Hard", val: beats.hard },
             ].map((b) => b.val && (
-              <div key={b.label} style={{
-                background: `${b.color}10`, border: `1px solid ${b.color}25`,
-                borderRadius: 8, padding: "8px 6px", textAlign: "center",
-              }}>
-                {/* Mini arc showing beat percentage */}
-                <div style={{ position: "relative", height: 28, marginBottom: 4 }}>
-                  <svg width="48" height="28" viewBox="0 0 48 28" style={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-                    {/* Track */}
-                    <path d="M4 24 A20 20 0 0 1 44 24" fill="none" stroke={`${b.color}20`} strokeWidth="3" strokeLinecap="round" />
-                    {/* Fill */}
-                    <path
-                      d="M4 24 A20 20 0 0 1 44 24"
-                      fill="none" stroke={b.color} strokeWidth="3" strokeLinecap="round"
-                      strokeDasharray={`${(parseFloat(b.val) / 100) * 62.8} 62.8`}
-                    />
-                  </svg>
-                  <div style={{
-                    position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)",
-                    fontSize: 14, fontWeight: 800, color: b.color, fontFamily: "'Syne',sans-serif",
-                  }}>{b.val}%</div>
-                </div>
-                <div style={{ fontSize: 14, color: "#cbd5e1", letterSpacing: "0.1em" }}>{b.label}</div>
+              <div key={b.label} className="beats__row">
+                <span className="beats__k">{b.label}</span>
+                <Ruler value={parseFloat(b.val)} max={100} step={25} suffix="%" />
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Contest stats */}
       {contest && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 14 }}>
-          <StatBox label="CONTESTS" value={contest.attended} sub="attended" color={meta.color} />
-          <StatBox label="GLOBAL RANK" value={`#${(contest.globalRank || 0).toLocaleString()}`} color={meta.color} />
-          <StatBox label="TOP %" value={`${contest.topPercentage}%`} color={meta.color} />
-        </div>
+        <StatLine items={[
+          { label: "Contests attended", value: contest.attended },
+          { label: "Global rank", value: `#${(contest.globalRank || 0).toLocaleString()}` },
+          { label: "Top %", value: `${contest.topPercentage}%` },
+        ]} />
       )}
 
-      {/* Contest rating progress bar */}
       {contestRating > 0 && (
-        <RatingBar current={contestRating} highest={contestRating} max={3500} color={meta.color} />
+        <Ruler value={contestRating} peak={contestRating} max={3500} step={500} label="Progress /3500" />
       )}
 
-      <div style={{ marginTop: 12, fontSize: 14, color: "#94a3b8", fontFamily: "'JetBrains Mono',monospace", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span>DATA FETCHED · {data._mock ? "DEMO DATA" : new Date(data.lastUpdated).toLocaleTimeString()}</span>
-        {data._mock && (
-          <span style={{ color: "#FFA11640", fontSize: 14, background: "#FFA11610", border: "1px solid #FFA11625", borderRadius: 4, padding: "2px 6px" }}>
-            MOCK — start backend to get live data
-          </span>
-        )}
-      </div>
-    </div>
+      <NbFoot data={data} />
+    </article>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CODEFORCES CARD
+// CODEFORCES
 // ─────────────────────────────────────────────────────────────────────────────
-const CF_RANK_BG = {
-  "newbie":                    "#80808018",
-  "pupil":                     "#00800018",
-  "specialist":                "#03A89E18",
-  "expert":                    "#0000FF18",
-  "candidate master":          "#AA00AA18",
-  "master":                    "#FF8C0018",
-  "international master":      "#FF8C0018",
-  "grandmaster":               "#FF000018",
-  "international grandmaster": "#FF000018",
-  "legendary grandmaster":     "#FF000018",
-};
-
-function CodeforcesCard({ data, meta }) {
-  const rankColor  = data.rankColour || meta.color;
-  const rankKey    = (data.rank || "").toLowerCase();
-  const rankBg     = CF_RANK_BG[rankKey] || `${meta.color}10`;
-  const byIndex    = data.solved?.byIndex || {};
-  const indexKeys  = ["A", "B", "C", "D", "E+"];
-  const maxIdx     = Math.max(...indexKeys.map(k => byIndex[k] || 0), 1);
+function CodeforcesCard({ data }) {
+  const byIndex   = data.solved?.byIndex || {};
+  const indexKeys = ["A", "B", "C", "D", "E+"];
+  const maxIdx    = Math.max(...indexKeys.map(k => byIndex[k] || 0), 1);
+  const rank      = (data.rank || "unranked").toLowerCase();
 
   return (
-    <div style={{
-      background: `linear-gradient(140deg,#020a12 0%,#08121a 60%,#040e18 100%)`,
-      border: `1px solid ${meta.color}28`, borderRadius: 20, padding: 26,
-      position: "relative", overflow: "hidden",
-      boxShadow: `0 4px 48px ${meta.glow}`,
-      flex: 1, display: "flex", flexDirection: "column",
-    }}>
-      <TopAccent color={meta.color} />
-      <LiveBadge color={meta.color} />
+    <article className="nb">
+      <NbHead platform="Codeforces" username={data.username} profileUrl={data.profileUrl} data={data}>
+        <span className="nb__chip">{data.rank || "unranked"}</span>
+      </NbHead>
 
-      <CardHeader platform="Codeforces" username={data.username} profileUrl={data.profileUrl} meta={meta}>
-        {/* Rank badge inline */}
-        <span style={{
-          background: rankBg, border: `1px solid ${rankColor}40`,
-          color: rankColor, fontSize: 14, borderRadius: 5, padding: "2px 8px",
-          fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.06em", fontWeight: 700,
-        }}>{data.rank || "unranked"}</span>
-      </CardHeader>
-
-      {/* Hero: solved + current rating */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+      <div className="nb__hero">
         <div>
-          <div style={{ fontSize: 13, color: "#94a3b8", letterSpacing: "0.15em", marginBottom: 4 }}>PROBLEMS SOLVED</div>
-          <div style={{ fontSize: "clamp(36px,8vw,48px)", fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-            {data.solved?.total || 0}
-          </div>
-          <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 3 }}>
-            Max rank <span style={{ color: rankColor }}>{data.maxRank}</span>
-          </div>
+          <Circled><strong className="display nb__big">{data.solved?.total || 0}</strong></Circled>
+          <Ann>problems solved</Ann>
+          <p className="nb__sub">Max rank {data.maxRank}</p>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 13, color: "#94a3b8", letterSpacing: "0.15em", marginBottom: 4 }}>CURRENT RATING</div>
-          <div style={{ fontSize: "clamp(28px,7vw,38px)", fontWeight: 900, color: rankColor, fontFamily: "'Syne',sans-serif", lineHeight: 1,
-            textShadow: `0 0 24px ${rankColor}44` }}>
-            {data.rating || 0}
-          </div>
-          <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 3 }}>Peak {data.maxRating || 0}</div>
+        <div className="r">
+          <strong className="display nb__mid nb__hl">{data.rating || 0}</strong>
+          <p className="note">current rating</p>
+          <p className="nb__sub">Peak {data.maxRating || 0}</p>
         </div>
       </div>
 
-      <RatingBar current={data.rating || 0} highest={data.maxRating || 0} max={3500} color={rankColor} />
-
-      {/* Contest stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 7, marginTop: 14 }}>
-        <StatBox label="CONTESTS"   value={data.contests?.count    || 0}  color={meta.color} />
-        <StatBox label="BEST RANK"  value={data.contests?.bestRank  ? `#${data.contests.bestRank.toLocaleString()}` : "—"} color={meta.color} />
-        <StatBox label="MAX GAIN"   value={data.contests?.maxRatingGain > 0 ? `+${data.contests.maxRatingGain}` : "—"} color="#2DB526" />
-        <StatBox label="MAX DROP"   value={data.contests?.maxRatingDrop < 0 ? `${data.contests.maxRatingDrop}` : "—"} color="#FF375F" />
+      <div className="nb__block">
+        <Ruler value={data.rating || 0} peak={data.maxRating || 0} max={3500} step={500}
+          bands={CF_LADDER} current={rank} label="Progress /3500 on the rating ladder" />
       </div>
 
-      {/* Problem index breakdown — A/B/C/D/E+ bars */}
+      <StatLine items={[
+        { label: "Contests", value: data.contests?.count || 0 },
+        { label: "Best rank", value: data.contests?.bestRank ? `#${data.contests.bestRank.toLocaleString()}` : "—" },
+        { label: "Max gain", value: data.contests?.maxRatingGain > 0 ? `+${data.contests.maxRatingGain}` : "—" },
+        { label: "Max drop", value: data.contests?.maxRatingDrop < 0 ? `${data.contests.maxRatingDrop}` : "—" },
+      ]} />
+
       {Object.keys(byIndex).length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.12em", marginBottom: 9 }}>PROBLEMS BY INDEX</div>
-          <div style={{ display: "flex", gap: 6, alignItems: "flex-end", height: 44 }}>
-            {indexKeys.map((k) => {
+        <div className="nb__block">
+          <h4 className="nb__label">Problems by index</h4>
+          <div className="plot">
+            {indexKeys.map((k, i) => {
               const val = byIndex[k] || 0;
-              const pct = (val / maxIdx) * 100;
-              // colour gets brighter for harder problems
-              const barColors = { A: "#3B9EE8", B: "#5bb0f0", C: "#FFC01E", D: "#FF8C00", "E+": "#FF375F" };
               return (
-                <div key={k} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                  <div style={{ fontSize: 14, color: barColors[k], fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>{val}</div>
-                  <div style={{
-                    width: "100%", height: `${Math.max(pct * 0.28, 3)}px`,
-                    background: `linear-gradient(180deg,${barColors[k]},${barColors[k]}88)`,
-                    borderRadius: "3px 3px 0 0", transition: "height 1.4s ease",
-                    minHeight: 3,
-                  }} />
-                  <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.05em" }}>{k}</div>
+                <div key={k} className="plot__col" style={{ "--i": i }}>
+                  <span className="display plot__n">{val}</span>
+                  <span className="plot__bar" style={{ height: `${Math.max((val / maxIdx) * 100, 3)}%` }} />
+                  <span className="plot__k">{k}</span>
                 </div>
               );
             })}
@@ -528,710 +372,356 @@ function CodeforcesCard({ data, meta }) {
         </div>
       )}
 
-      <div style={{ marginTop: 14, fontSize: 14, color: "#64748b", fontFamily: "'JetBrains Mono',monospace", display: "flex", justifyContent: "space-between" }}>
-        <span>DATA FETCHED · {data._mock ? "DEMO DATA" : new Date(data.lastUpdated).toLocaleTimeString()}</span>
-        {data._mock && <span style={{ color: "#3B9EE830", fontSize: 14, background: "#3B9EE810", border: "1px solid #3B9EE820", borderRadius: 4, padding: "2px 6px" }}>MOCK</span>}
-      </div>
-    </div>
+      <NbFoot data={data} short />
+    </article>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HACKERRANK CARD
+// HACKERRANK (not rendered — kept for future use)
 // ─────────────────────────────────────────────────────────────────────────────
-
-// Star level colour mapping
 // eslint-disable-next-line no-unused-vars
-const HR_LEVEL_COLORS = { 1: "#CD7F32", 2: "#CD7F32", 3: "#C0C0C0", 4: "#C0C0C0", 5: "#FFD700" };
-
-function HRBadge({ badge, accentColor }) {
-  const stars    = badge.stars || 0;
-  const maxStars = 5;
-  const levelColor = stars >= 5 ? "#FFD700" : stars >= 3 ? "#C0C0C0" : "#CD7F32";
-
+function HackerRankCard({ data }) {
+  const badges      = data.badges || [];
+  const totalStars  = data.totalStars || badges.reduce((s, b) => s + (b.stars || 0), 0);
+  const totalBadges = data.totalBadges || badges.length;
+  const sorted      = [...badges].sort((a, b) => (b.stars || 0) - (a.stars || 0));
   return (
-    <div style={{
-      background: `${levelColor}0c`, border: `1px solid ${levelColor}30`,
-      borderRadius: 10, padding: "10px 10px", display: "flex", flexDirection: "column",
-      alignItems: "center", gap: 5, minWidth: 0,
-    }}>
-      {/* Star row */}
-      <div style={{ display: "flex", gap: 2 }}>
-        {Array.from({ length: maxStars }).map((_, i) => (
-          <svg key={i} width="9" height="9" viewBox="0 0 24 24"
-            fill={i < stars ? levelColor : "none"} stroke={levelColor} strokeWidth="2"
-            style={{ opacity: i < stars ? 1 : 0.2 }}>
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-          </svg>
-        ))}
+    <article className="nb">
+      <NbHead platform="HackerRank" username={data.username} profileUrl={data.profileUrl} mock={data._mock} />
+      <div className="nb__hero">
+        <div><Circled><strong className="display nb__big">{totalBadges}</strong></Circled><Ann>total badges</Ann>{data.school && <p className="nb__sub">{data.school}</p>}</div>
+        <div className="r"><strong className="display nb__mid nb__hl">★ {totalStars}</strong><p className="note">total stars</p></div>
       </div>
-      {/* Badge name */}
-      <div style={{ fontSize: 14, color: levelColor, fontFamily: "'JetBrains Mono',monospace",
-        letterSpacing: "0.04em", textAlign: "center", lineHeight: 1.3, fontWeight: 600 }}>
-        {badge.name}
-      </div>
-      {/* Level label */}
-      {badge.level && (
-        <div style={{ fontSize: 14, color: `${levelColor}80`, letterSpacing: "0.08em" }}>
-          {badge.level}
-        </div>
+      {(data.solved?.total || 0) > 0
+        ? <StatLine items={[{ label: "Problems solved", value: data.solved.total }]} />
+        : <p className="nb__sub">HackerRank tracks progress via badges &amp; stars, not a raw solved count. Their profile page is client-side rendered — the metrics above are the real primary data.</p>}
+      {sorted.length > 0 && (
+        <ul className="tags">{sorted.slice(0, 8).map((b, i) => <li key={i} className="tag">{b.name} {"★".repeat(b.stars || 0)}{b.level ? ` · ${b.level}` : ""}</li>)}</ul>
       )}
-    </div>
-  );
-}
-
-// eslint-disable-next-line no-unused-vars
-function HackerRankCard({ data, meta }) {
-  const badges     = data.badges     || [];
-  const totalStars = data.totalStars || badges.reduce((s, b) => s + (b.stars || 0), 0);
-  const totalBadges= data.totalBadges || badges.length;
-
-  // HackerRank tracks progress by badges & stars, not a raw "problems solved" count.
-  // Their profile page is JS-rendered so that number can't be scraped server-side.
-  // We surface badges as the primary metric — this is what HR actually highlights.
-  const hasSolvedCount = (data.solved?.total || 0) > 0;
-
-  // Sort badges: most stars first
-  const sortedBadges = [...badges].sort((a, b) => (b.stars || 0) - (a.stars || 0));
-
-  // Gold badges (5★), Silver (3-4★), Bronze (1-2★)
-  const gold   = badges.filter(b => (b.stars || 0) >= 5).length;
-  const silver = badges.filter(b => (b.stars || 0) >= 3 && (b.stars || 0) < 5).length;
-  const bronze = badges.filter(b => (b.stars || 0) > 0 && (b.stars || 0) < 3).length;
-
-  return (
-    <div style={{
-      background: `linear-gradient(140deg,#000f08 0%,#001a0d 60%,#001208 100%)`,
-      border: `1px solid ${meta.color}28`, borderRadius: 20, padding: 26,
-      position: "relative", overflow: "hidden",
-      boxShadow: `0 4px 48px ${meta.glow}`,
-    }}>
-      <TopAccent color={meta.color} />
-      <LiveBadge color={meta.color} />
-
-      <CardHeader platform="HackerRank" username={data.username} profileUrl={data.profileUrl} meta={meta}>
-        {data.name && (
-          <span style={{ fontSize: 14, color: `${meta.color}70`, fontFamily: "'JetBrains Mono',monospace" }}>
-            {data.name}
-          </span>
-        )}
-      </CardHeader>
-
-      {/* ── HERO: Badges + Stars (primary HR metrics) ── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-        {/* Left: total badges big number */}
-        <div>
-          <div style={{ fontSize: 14, color: "#86efac", letterSpacing: "0.15em", marginBottom: 4 }}>TOTAL BADGES</div>
-          <div style={{ fontSize: 52, fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-            {totalBadges}
-          </div>
-          {data.school && (
-            <div style={{ fontSize: 14, color: "#86efac", marginTop: 4, maxWidth: 160, lineHeight: 1.4 }}>{data.school}</div>
-          )}
-        </div>
-
-        {/* Right: stars + tier breakdown */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 14, color: "#86efac", letterSpacing: "0.12em", marginBottom: 3 }}>TOTAL STARS</div>
-            <div style={{ fontSize: 36, fontWeight: 900, color: "#FFD700", fontFamily: "'Syne',sans-serif", lineHeight: 1,
-              textShadow: "0 0 20px #FFD70044" }}>
-              ★ {totalStars}
-            </div>
-          </div>
-          {/* Tier pills */}
-          <div style={{ display: "flex", gap: 5 }}>
-            {[
-              { label: "GOLD",   count: gold,   color: "#FFD700" },
-              { label: "SILV",   count: silver, color: "#C0C0C0" },
-              { label: "BRNZ",   count: bronze, color: "#CD7F32" },
-            ].map(t => t.count > 0 && (
-              <div key={t.label} style={{
-                background: `${t.color}12`, border: `1px solid ${t.color}35`,
-                borderRadius: 5, padding: "3px 7px", textAlign: "center",
-              }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: t.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>{t.count}</div>
-                <div style={{ fontSize: 14, color: `${t.color}70`, letterSpacing: "0.08em" }}>{t.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Solved count row (only if available) ── */}
-      {hasSolvedCount ? (
-        <div style={{
-          background: `${meta.color}08`, border: `1px solid ${meta.color}20`,
-          borderRadius: 9, padding: "10px 14px", marginBottom: 14,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-        }}>
-          <span style={{ fontSize: 14, color: "#86efac", letterSpacing: "0.12em" }}>PROBLEMS SOLVED</span>
-          <span style={{ fontSize: 20, fontWeight: 800, color: meta.color, fontFamily: "'Syne',sans-serif" }}>
-            {data.solved.total}
-          </span>
-        </div>
-      ) : (
-        /* Friendly note explaining why solved count is missing */
-        <div style={{
-          background: "#001a0d", border: "1px dashed #2DB52625",
-          borderRadius: 9, padding: "9px 12px", marginBottom: 14,
-          display: "flex", alignItems: "center", gap: 8,
-        }}>
-          <span style={{ fontSize: 14, lineHeight: 1 }}>ℹ️</span>
-          <span style={{ fontSize: 14, color: "#86efac", fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.6 }}>
-            HackerRank tracks progress via <span style={{ color: meta.color }}>badges & stars</span>, not a raw solved count.
-            Their profile page is client-side rendered — the metrics above are the real primary data.
-          </span>
-        </div>
-      )}
-
-      {/* ── Star distribution bars ── */}
-      {totalStars > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 14, color: "#86efac", letterSpacing: "0.12em", marginBottom: 8 }}>STAR DISTRIBUTION</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {[5, 4, 3, 2, 1].map(n => {
-              const count = badges.filter(b => (b.stars || 0) === n).length;
-              const pct   = badges.length > 0 ? (count / badges.length) * 100 : 0;
-              const sc    = n >= 5 ? "#FFD700" : n >= 3 ? "#C0C0C0" : "#CD7F32";
-              if (count === 0) return null;
-              return (
-                <div key={n} style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                  <span style={{ fontSize: 14, color: sc, width: 18, textAlign: "right", fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>{n}★</span>
-                  <div style={{ flex: 1, height: 5, background: "#001508", borderRadius: 3, overflow: "hidden" }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: `linear-gradient(90deg,${sc}55,${sc})`, borderRadius: 3, transition: "width 1.5s ease" }} />
-                  </div>
-                  <span style={{ fontSize: 14, color: sc, width: 14, textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontWeight: 700 }}>{count}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Badge grid ── */}
-      {sortedBadges.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 14, color: "#86efac", letterSpacing: "0.12em", marginBottom: 8 }}>EARNED BADGES</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(78px,1fr))", gap: 7 }}>
-            {sortedBadges.slice(0, 8).map((b, i) => (
-              <HRBadge key={i} badge={b} accentColor={meta.color} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginTop: 12, fontSize: 14, color: "#64748b", fontFamily: "'JetBrains Mono',monospace", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span>DATA FETCHED · {data._mock ? "DEMO DATA" : new Date(data.lastUpdated).toLocaleTimeString()}</span>
-        {data._mock && <span style={{ color: "#00EA6430", fontSize: 14, background: "#00EA6410", border: "1px solid #00EA6420", borderRadius: 4, padding: "2px 6px" }}>MOCK</span>}
-      </div>
-    </div>
+      <NbFoot data={data} short />
+    </article>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GENERIC LIVE CARD  (GFG, CodeStudio)
+// GENERIC (GFG, CodeStudio — not rendered)
 // ─────────────────────────────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
-function GenericLiveCard({ data, pkey, meta }) {
-  const cc = data?.solved?.total || 0;
+function GenericLiveCard({ data, pkey }) {
   const extras = [];
-
   if (pkey === "gfg") {
-    if (data.codingScore)  extras.push({ label: "SCORE",      value: data.codingScore });
-    if (data.streak?.max)  extras.push({ label: "MAX STREAK", value: data.streak.max });
-    if (data.solved?.hard) extras.push({ label: "HARD",       value: data.solved.hard });
+    if (data.codingScore)  extras.push({ label: "Score",      value: data.codingScore });
+    if (data.streak?.max)  extras.push({ label: "Max streak", value: data.streak.max });
+    if (data.solved?.hard) extras.push({ label: "Hard",       value: data.solved.hard });
   }
   if (pkey === "codestudio") {
-    if (data.rating)     extras.push({ label: "SCORE", value: data.rating });
-    if (data.globalRank) extras.push({ label: "RANK",  value: data.globalRank });
+    if (data.rating)     extras.push({ label: "Score", value: data.rating });
+    if (data.globalRank) extras.push({ label: "Rank",  value: data.globalRank });
   }
-
   return (
-    <div style={{
-      background: `linear-gradient(140deg,${meta.bg} 0%,#0f1118 100%)`,
-      border: `1px solid ${meta.color}35`, borderRadius: 20, padding: 24,
-      position: "relative", overflow: "hidden",
-      boxShadow: `0 2px 32px ${meta.glow}`,
-    }}>
-      <TopAccent color={meta.color} />
-      <LiveBadge color={meta.color} />
-
-      <CardHeader platform={data.platform} username={data.username} profileUrl={data.profileUrl} meta={meta} />
-
-      {/* Solved hero */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.15em", marginBottom: 3 }}>PROBLEMS SOLVED</div>
-        <div style={{ fontSize: 44, fontWeight: 900, color: meta.color, fontFamily: "'Syne',sans-serif", lineHeight: 1 }}>
-          {cc}
-        </div>
-      </div>
-
-      {/* Extra stats */}
-      {extras.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(extras.length, 3)},1fr)`, gap: 8, marginBottom: 12 }}>
-          {extras.map((e, i) => (
-            <StatBox key={i} label={e.label} value={e.value} color={meta.color} />
-          ))}
-        </div>
-      )}
-
-      {/* GFG difficulty breakdown */}
-      {pkey === "gfg" && data.solved?.easy !== undefined && (
-        <div style={{ marginTop: 8 }}>
-          <div style={{ fontSize: 14, color: "#86efac", letterSpacing: "0.12em", marginBottom: 6 }}>DIFFICULTY SPLIT</div>
-          <SegmentBar segments={[
-            { pct: data.solved.school || 1, color: "#888888" },
-            { pct: data.solved.basic  || 1, color: "#4a90e2" },
-            { pct: data.solved.easy   || 1, color: "#00B8A3" },
-            { pct: data.solved.medium || 1, color: "#FFC01E" },
-            { pct: data.solved.hard   || 1, color: "#FF375F" },
-          ]} />
-          <div style={{ display: "flex", gap: 10, marginTop: 6, flexWrap: "wrap" }}>
-            {[
-              { l: "S", v: data.solved.school, c: "#888888" },
-              { l: "B", v: data.solved.basic,  c: "#4a90e2" },
-              { l: "E", v: data.solved.easy,   c: "#00B8A3" },
-              { l: "M", v: data.solved.medium, c: "#FFC01E" },
-              { l: "H", v: data.solved.hard,   c: "#FF375F" },
-            ].map(d => (
-              <span key={d.l} style={{ fontSize: 14, color: d.c, fontFamily: "'JetBrains Mono',monospace" }}>
-                {d.l}:{d.v || 0}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginTop: 12, fontSize: 14, color: "#94a3b8", fontFamily: "'JetBrains Mono',monospace" }}>
-        UPDATED · {new Date(data.lastUpdated).toLocaleTimeString()}
-      </div>
-    </div>
+    <article className="nb">
+      <NbHead platform={data.platform} username={data.username} profileUrl={data.profileUrl} mock={data._mock} />
+      <div className="nb__hero"><div><Circled><strong className="display nb__big">{data?.solved?.total || 0}</strong></Circled><Ann>problems solved</Ann></div></div>
+      {extras.length > 0 && <StatLine items={extras} />}
+      <p className="nb__foot"><span>Updated {fmtTime(data.lastUpdated)}</span></p>
+    </article>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SKELETON / PENDING CARD
+// LOADING — pencil sketch of the card
 // ─────────────────────────────────────────────────────────────────────────────
-function SkeletonLine({ w = "100%", h = 14, r = 5, mb = 0 }) {
+function PendingCard({ platform, pkey }) {
   return (
-    <div style={{
-      width: w, height: h, borderRadius: r, marginBottom: mb,
-      background: "linear-gradient(90deg,#141820 25%,#1c2230 50%,#141820 75%)",
-      backgroundSize: "200% 100%", animation: "shimmer 1.8s infinite",
-    }} />
-  );
-}
-
-function PendingCard({ platform, pkey, meta }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "#0a0c12", borderRadius: 20, padding: 24,
-        border: `1px solid ${hovered ? meta.color + "35" : "#141a28"}`,
-        transition: "border-color 0.3s", position: "relative", overflow: "hidden",
-      }}
-    >
-      <div style={{
-        position: "absolute", top: 0, left: "20%", right: "20%", height: 1,
-        background: `linear-gradient(90deg,transparent,${meta.color}35,transparent)`,
-        opacity: hovered ? 1 : 0.25, transition: "opacity 0.3s",
-      }} />
-
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <PlatformIcon text={meta.text} color={meta.color} bg={meta.bg} />
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: "#c0c8e0", fontFamily: "'Syne',sans-serif", marginBottom: 3 }}>
-            {platform.platform}
-          </div>
-          <a href={platform.profileUrl} target="_blank" rel="noopener noreferrer"
-            style={{ color: `${meta.color}80`, fontSize: 14, fontFamily: "'JetBrains Mono',monospace", textDecoration: "none" }}>
-            @{platform.username} ↗
-          </a>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
-        {["SOLVED", "RATING", "RANK", "CONTESTS"].map((lbl) => (
-          <div key={lbl} style={{ background: "#0d1020", border: "1px solid #141a28", borderRadius: 8, padding: "10px 10px" }}>
-            <SkeletonLine w="70%" h={16} r={4} mb={5} />
-            <div style={{ fontSize: 14, color: "#64748b", letterSpacing: "0.12em" }}>{lbl}</div>
-          </div>
+    <article className="nb nb--pending" aria-busy="true">
+      <NbHead platform={platform.platform} username={platform.username} profileUrl={platform.profileUrl} live={false} />
+      <div className="sketch">
+        {["Solved", "Rating", "Rank", "Contests"].map((lbl) => (
+          <div key={lbl}><span className="sketch__box" /><span className="note">{lbl}</span></div>
         ))}
       </div>
-
-      <div style={{
-        background: `${meta.color}07`, border: `1px dashed ${meta.color}28`,
-        borderRadius: 9, padding: "10px 14px", textAlign: "center",
-      }}>
-        <div style={{ fontSize: 14, color: `${meta.color}70`, fontFamily: "'JetBrains Mono',monospace", lineHeight: 1.8 }}>
-          Start backend to stream live data<br />
-          <span style={{ color: "#64748b", fontSize: 14 }}>GET /api/{pkey}/{platform.username}</span>
-        </div>
-      </div>
-    </div>
+      <p className="nb__sub">Loading {pkey === "codeforces" ? "live data from the Codeforces API" : "the latest stats snapshot"}…</p>
+    </article>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SUMMARY BANNER
+// SUMMARY (not rendered — kept for future use)
 // ─────────────────────────────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
-function SummaryBanner({ platformData, loading, mounted }) {
+function SummaryBanner({ platformData, loading }) {
   const liveTotal = Object.values(platformData).reduce((s, p) => s + (p?.solved?.total || 0), 0);
   const total = HARISH_DATA.codechef.solved.total + liveTotal;
-  const loaded = Object.keys(platformData).length + 1; // +1 for codechef
+  const loaded = Object.keys(platformData).length + 1;
+  return (
+    <article className="nb">
+      <div className="nb__hero"><div><Circled><strong className="display nb__big">{total}</strong></Circled><Ann>total problems solved</Ann>
+        <p className="nb__sub">{loading ? "⟳ Fetching from all platforms..." : `Aggregated across ${loaded} platforms`}</p></div></div>
+      <StatLine items={[{ label: "Platforms", value: `${loaded}/6` }, { label: "CC rating", value: "1462" }, { label: "CC peak", value: "1651" }]} />
+    </article>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPACT CARDS — CodeChef, GeeksforGeeks, HackerRank, CodeStudio
+// ─────────────────────────────────────────────────────────────────────────────
+const SPLIT_CLASS = { school: "is-basic", basic: "is-basic", easy: "is-easy", medium: "is-medium", moderate: "is-medium", hard: "is-hard", ninja: "is-ninja" };
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function Split({ parts }) {
+  const shown = parts.filter((p) => p.count > 0);
+  if (!shown.length) return null;
+  return (
+    <div className="split split--mini">
+      {shown.map((p) => (
+        <div key={p.label} className={`split__seg ${SPLIT_CLASS[p.label] || "is-basic"}`} style={{ flexGrow: p.count }}>
+          <span className="split__bar" />
+          <span className="split__lbl"><b className="display">{p.count}</b> {cap(p.label)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const splitOf = (solved, order) => order.filter((k) => solved?.[k] !== undefined).map((k) => ({ label: k, count: solved[k] || 0 }));
+const rank = (n) => (n ? `#${Number(n).toLocaleString()}` : "—");
+
+const MINI = {
+  codechef: (d) => ({
+    big: d.solved?.total ?? "—", bigLabel: "problems solved",
+    metric: d.rating, metricLabel: "rating",
+    metricSub: `${"★".repeat(d.stars || 0)} ${d.division || ""}, peak ${d.highestRating}`.trim(),
+    facts: [
+      { label: "Contests", value: d.contests },
+      { label: "Global rank", value: rank(d.globalRank) },
+      { label: "India rank", value: rank(d.countryRank) },
+    ],
+  }),
+  gfg: (d) => ({
+    big: d.solved?.total ?? 0, bigLabel: "problems solved",
+    metric: d.codingScore, metricLabel: "coding score",
+    split: splitOf(d.solved, ["school", "basic", "easy", "medium", "hard"]),
+    facts: [
+      { label: "Institute rank", value: rank(d.instituteRank) },
+      ...(d.maxStreak ? [{ label: "Day longest streak", value: d.maxStreak }] : []),
+    ],
+  }),
+  hackerrank: (d) => ({
+    big: d.totalBadges ?? (d.badges || []).length, bigLabel: "badges earned",
+    metric: `★ ${d.totalStars ?? 0}`, metricLabel: "total stars",
+    facts: d.solved?.total ? [{ label: "Challenges solved across badges", value: d.solved.total }] : null,
+    tags: (d.badges || []).map((b) => `${b.name} ${"★".repeat(b.stars || 0)}`),
+  }),
+  atcoder: (d) => ({
+    big: d.solved?.total ?? 0, bigLabel: "problems solved",
+    metric: d.rating, metricLabel: "rating",
+    metricSub: `peak ${d.highestRating}, ${d.ratedContests} rated contest${d.ratedContests === 1 ? "" : "s"}`,
+    facts: [
+      { label: "Rank", value: d.rank ? `#${Number(d.rank).toLocaleString()}` : "—" },
+      ...(d.topPercent ? [{ label: "Top percentile", value: `${d.topPercent}%` }] : []),
+      ...(d.bestPerformance ? [{ label: "Best performance", value: d.bestPerformance }] : []),
+    ],
+    note: d.lastCompeted ? `Last competed ${d.lastCompeted}` : null,
+  }),
+  codestudio: (d) => ({
+    big: d.solved?.total ?? 0, bigLabel: "problems solved",
+    metric: d.level || "—", metricLabel: "level",
+    metricSub: d.exp ? `${Number(d.exp).toLocaleString()} XP` : null,
+    split: splitOf(d.solved, ["easy", "moderate", "hard", "ninja"]),
+    tags: d.badges || [],
+  }),
+};
+
+function MiniCard({ pkey, info, data }) {
+  const meta = PLATFORM_META[pkey] || EXTRA_PROFILES[pkey];
+  const m = data ? MINI[pkey](data) : null;
+  return (
+    <article className="mini">
+      <header className="mini__head">
+        <span className="other__mark" aria-hidden="true">{meta.text}</span>
+        <h3 className="display mini__name">{info.platform}</h3>
+        <a href={info.profileUrl} target="_blank" rel="noopener noreferrer" className="nb__user">@{info.username}</a>
+        {data && (
+          <span className={`note nb__status ${freshness(data) === "Live" ? "" : "is-mock"}`}>
+            <span className={freshness(data) === "Live" ? "live-dot" : "nb__dot"} aria-hidden="true" />{freshness(data)}
+          </span>
+        )}
+      </header>
+
+      {m ? (
+        <>
+          <div className="nb__hero mini__hero">
+            <div>
+              <Circled><strong className="display mini__big">{m.big}</strong></Circled>
+              <p className="note mini__ann">{m.bigLabel}</p>
+            </div>
+            <div className="r">
+              <strong className="display mini__mid nb__hl">{m.metric}</strong>
+              <p className="note">{m.metricLabel}</p>
+              {m.metricSub && <p className="nb__sub">{m.metricSub}</p>}
+            </div>
+          </div>
+          {m.split && <Split parts={m.split} />}
+          {m.facts && <StatLine items={m.facts} />}
+          {m.tags && m.tags.length > 0 && <ul className="tags">{m.tags.map((t) => <li key={t} className="tag">{t}</li>)}</ul>}
+          {m.note && <p className="nb__sub">{m.note}</p>}
+        </>
+      ) : (
+        <p className="nb__sub mini__empty">
+          Stats aren't available right now. <a className="nb__user" href={info.profileUrl} target="_blank" rel="noopener noreferrer">Open the {info.platform} profile</a>
+        </p>
+      )}
+    </article>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN
+// ─────────────────────────────────────────────────────────────────────────────
+// Same shaping as scripts/fetch-coding-stats.js (kept in sync)
+function shapeCodeforces(user, subs, history) {
+  const accepted = new Set();
+  const byIndex = { A: 0, B: 0, C: 0, D: 0, "E+": 0 };
+  subs.forEach((sub) => {
+    if (sub.verdict !== "OK") return;
+    const key = `${sub.problem.contestId}-${sub.problem.index}`;
+    if (accepted.has(key)) return;
+    accepted.add(key);
+    const l = sub.problem.index[0].toUpperCase();
+    byIndex[["A", "B", "C", "D"].includes(l) ? l : "E+"] += 1;
+  });
+  let bestRank = Infinity, worstRank = 0, maxUp = 0, maxDown = 0;
+  history.forEach((entry) => {
+    bestRank = Math.min(bestRank, entry.rank);
+    worstRank = Math.max(worstRank, entry.rank);
+    const d = entry.newRating - entry.oldRating;
+    maxUp = Math.max(maxUp, d);
+    maxDown = Math.min(maxDown, d);
+  });
+  return {
+    platform: "Codeforces",
+    username: user.handle,
+    profileUrl: `https://codeforces.com/profile/${user.handle}`,
+    solved: { total: accepted.size, byIndex },
+    rating: user.rating || 0,
+    maxRating: user.maxRating || 0,
+    rank: user.rank || "unranked",
+    maxRank: user.maxRank || "unranked",
+    contests: {
+      count: history.length,
+      bestRank: bestRank === Infinity ? null : bestRank,
+      worstRank: worstRank || null,
+      maxRatingGain: maxUp,
+      maxRatingDrop: maxDown,
+    },
+    lastUpdated: new Date().toISOString(),
+  };
+}
+
+async function fetchCodeforcesLive(handle) {
+  const get = async (method, params) => {
+    const r = await fetch(`https://codeforces.com/api/${method}?${new URLSearchParams(params)}`, { signal: AbortSignal.timeout(15_000) });
+    const json = await r.json();
+    if (json.status !== "OK") throw new Error(json.comment || method);
+    return json.result;
+  };
+  const [[user], subs, history] = await Promise.all([
+    get("user.info", { handles: handle }),
+    get("user.status", { handle, from: 1, count: 10000 }),
+    get("user.rating", { handle }),
+  ]);
+  return shapeCodeforces(user, subs, history);
+}
+
+function useDrawn() {
+  const ref = useRef(null);
+  const [drawn, setDrawn] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    if (prefersReducedMotion() || typeof IntersectionObserver === "undefined") { setDrawn(true); return undefined; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setDrawn(true); io.disconnect(); } }, { threshold: 0.2 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return [ref, drawn];
+}
+
+export default function Coding() {
+  const [platformData, setPlatformData] = useState({});
+  const [loading,      setLoading]      = useState(true);
+  const [bookRef, drawn] = useDrawn();
+  const [miniRef, miniDrawn] = useDrawn();
+
+  useEffect(() => {
+    let cancelled = false;
+    const apply = (patch) => { if (!cancelled) setPlatformData((prev) => ({ ...prev, ...patch })); };
+
+    // 1) Build-time snapshot (public/coding-stats.json): same origin, instant, no server
+    const snapshot = fetch(`${process.env.PUBLIC_URL || ""}/coding-stats.json`, { cache: "no-cache" })
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+      .then((snap) => ({
+        leetcode:   snap?.leetcode   ? { ...snap.leetcode,   _snapshot: true } : MOCK_LEETCODE,
+        codeforces: snap?.codeforces ? { ...snap.codeforces, _snapshot: true } : MOCK_CODEFORCES,
+        codechef:   snap?.codechef   ? { ...snap.codechef,   _snapshot: true }
+                                     : { ...HARISH_DATA.codechef, _snapshot: true },
+        gfg:        snap?.gfg        ? { ...snap.gfg,        _snapshot: true } : null,
+        hackerrank: snap?.hackerrank ? { ...snap.hackerrank, _snapshot: true } : MOCK_HACKERRANK,
+        codestudio: snap?.codestudio ? { ...snap.codestudio, _snapshot: true } : null,
+        atcoder:    snap?.atcoder    ? { ...snap.atcoder,    _snapshot: true } : null,
+      }));
+
+    // 2) Codeforces live, straight from the browser (its official API allows CORS)
+    const live = fetchCodeforcesLive(HARISH_DATA.codeforces.username).catch(() => null);
+
+    snapshot.then((patch) => { apply(patch); if (!cancelled) setLoading(false); });
+    Promise.all([snapshot, live]).then(([, cf]) => { if (cf) apply({ codeforces: cf }); });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  const otherProfiles = [
+    { key: "codechef",   label: "CodeChef",      url: HARISH_DATA.codechef.profileUrl   },
+    { key: "gfg",        label: "GeeksforGeeks", url: HARISH_DATA.gfg.profileUrl        },
+    { key: "hackerrank", label: "HackerRank",    url: HARISH_DATA.hackerrank.profileUrl },
+    { key: "codestudio", label: "CodeStudio",    url: HARISH_DATA.codestudio.profileUrl },
+    { key: "atcoder",    label: "AtCoder",       url: EXTRA_PROFILES.atcoder.profileUrl },
+  ];
 
   return (
-    <div style={{
-      background: "linear-gradient(135deg,#08090f 0%,#0d1020 100%)",
-      border: "1px solid #151e30", borderRadius: 20,
-      padding: "26px 30px", marginBottom: 32,
-      opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(20px)",
-      transition: "all 0.8s ease 0.15s",
-      position: "relative", overflow: "hidden",
-    }}>
-      {/* Grid bg texture */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        backgroundImage: "linear-gradient(#ffffff03 1px,transparent 1px),linear-gradient(90deg,#ffffff03 1px,transparent 1px)",
-        backgroundSize: "44px 44px",
-      }} />
-      <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 28, alignItems: "center", justifyContent: "space-between" }}>
-        <div>
-          <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.2em", marginBottom: 5 }}>TOTAL PROBLEMS SOLVED</div>
-          <div style={{
-            fontSize: "clamp(42px,6vw,60px)", fontWeight: 900, color: "#f0ece4",
-            fontFamily: "'Syne',sans-serif", lineHeight: 1, textShadow: "0 0 50px #C17A3520",
-          }}>
-            <CountUp to={total} />
-          </div>
-          <div style={{ fontSize: 14, color: "#94a3b8", marginTop: 5, letterSpacing: "0.05em" }}>
-            {loading ? "⟳ Fetching from all platforms..." : `Aggregated across ${loaded} platforms`}
-          </div>
+    <section id="coding" className="section section--grid coding" aria-labelledby="coding-title">
+      <div className="container">
+        <SectionHead
+          id="coding-title"
+          title="Coding"
+          note="Competitive programmer"
+          meta={`${HARISH_DATA.name}, ${HARISH_DATA.college}, ${HARISH_DATA.location}`}
+        />
+
+        <p className="note coding__note">Featured, detailed live cards</p>
+        <div ref={bookRef} className={`notebook ${drawn ? "is-drawn" : ""}`}>
+          {loading
+            ? <PendingCard platform={HARISH_DATA.leetcode} pkey="leetcode" />
+            : <LeetCodeCard data={platformData.leetcode || MOCK_LEETCODE} />}
+          {loading
+            ? <PendingCard platform={HARISH_DATA.codeforces} pkey="codeforces" />
+            : <CodeforcesCard data={platformData.codeforces || MOCK_CODEFORCES} />}
         </div>
-        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-          {[
-            { label: "PLATFORMS", val: `${loaded}/6` },
-            { label: "CC RATING", val: "1462" },
-            { label: "CC PEAK",   val: "1651" },
-          ].map(s => (
-            <div key={s.label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 26, fontWeight: 800, color: "#c8d0e8", fontFamily: "'Syne',sans-serif" }}>{s.val}</div>
-              <div style={{ fontSize: 14, color: "#64748b", letterSpacing: "0.14em", marginTop: 2 }}>{s.label}</div>
-            </div>
+
+        <p className="note coding__note coding__note--more">Other profiles</p>
+        <div ref={miniRef} className={`minis ${miniDrawn ? "is-drawn" : ""}`}>
+          {otherProfiles.map(({ key, label, url }) => (
+            <MiniCard
+              key={key}
+              pkey={key}
+              info={{ platform: label, profileUrl: url, username: (HARISH_DATA[key] || EXTRA_PROFILES[key]).username }}
+              data={platformData[key]}
+            />
           ))}
         </div>
       </div>
-
-      {/* Contribution bars */}
-      {Object.keys(platformData).length > 0 && (
-        <div style={{ position: "relative", marginTop: 22 }}>
-          <div style={{ fontSize: 14, color: "#64748b", letterSpacing: "0.15em", marginBottom: 10 }}>PLATFORM CONTRIBUTION</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {[
-              { key: "codechef",   label: "CodeChef",   n: HARISH_DATA.codechef.solved.total },
-              ...Object.entries(platformData).map(([k, v]) => ({
-                key: k, label: v.platform, n: v.solved?.total || 0,
-              })),
-            ].map(({ key, label, n }) => {
-              const pct = total > 0 ? (n / total * 100).toFixed(1) : 0;
-              const m   = PLATFORM_META[key] || PLATFORM_META.codechef;
-              return (
-                <div key={key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 74, fontSize: 14, color: m.color, fontFamily: "'JetBrains Mono',monospace", flexShrink: 0 }}>
-                    {label}
-                  </div>
-                  <div style={{ flex: 1, height: 5, background: "#0e1420", borderRadius: 3, overflow: "hidden" }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: `linear-gradient(90deg,${m.color}66,${m.color})`, borderRadius: 3, transition: "width 1.2s ease" }} />
-                  </div>
-                  <div style={{ width: 36, fontSize: 14, color: "#94a3b8", textAlign: "right", fontFamily: "'JetBrains Mono',monospace" }}>{pct}%</div>
-                  <div style={{ width: 28, fontSize: 14, color: m.color, textAlign: "right", fontFamily: "'JetBrains Mono',monospace" }}>{n}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN APP
-// ─────────────────────────────────────────────────────────────────────────────
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:4000/api";
-
-export default function Coding() {
-  const isMobile = useIsMobile();
-  const [mounted,      setMounted]      = useState(false);
-  const [platformData, setPlatformData] = useState({});
-  const [loading,      setLoading]      = useState(true);
-
-  useEffect(() => { setTimeout(() => setMounted(true), 80); }, []);
-
-  useEffect(() => {
-    const fetchAll = async () => {
-      // ── Tier 1: Direct platform APIs (LeetCode, Codeforces) ─────────────────
-      const directCalls = [
-        ["leetcode",   `${API_BASE}/leetcode/HarishVardhan27`],
-        ["codeforces", `${API_BASE}/codeforces/HarishVardhan27`],
-      ];
-
-      // ── Tier 2: Codolio aggregator (GFG + HackerRank + CodeStudio) ──────────
-      // One Puppeteer call to Codolio returns all three in a single response.
-      const codolioCall = fetch(`${API_BASE}/codolio/Yugen27`, {
-        signal: AbortSignal.timeout(45_000),
-      }).then(r => r.ok ? r.json() : null);
-
-      const [directResults, codolioResult] = await Promise.all([
-        Promise.allSettled(
-          directCalls.map(([, url]) =>
-            fetch(url, { signal: AbortSignal.timeout(15_000) }).then(r => r.ok ? r.json() : null)
-          )
-        ),
-        codolioCall.catch(() => null),
-      ]);
-
-      const newData = {};
-
-      // Process direct results
-      directCalls.forEach(([key], i) => {
-        const r = directResults[i];
-        if (r.status === "fulfilled" && r.value && !r.value.error) {
-          newData[key] = r.value;
-        }
-      });
-
-      // ── Process Codolio response ─────────────────────────────────────────────
-      // Codolio returns: { platforms: { gfg: {...}, hackerrank: {...}, codestudio: {...} } }
-      if (codolioResult && !codolioResult._unavailable && codolioResult.platforms) {
-        const cp = codolioResult.platforms;
-
-        if (cp.gfg) {
-          newData.gfg = {
-            platform: "GeeksforGeeks",
-            username: "harishvawvad",
-            profileUrl: "https://www.geeksforgeeks.org/profile/harishvawvad",
-            solved: { total: cp.gfg.total || 0, easy: cp.gfg.easy || 0, medium: cp.gfg.medium || 0, hard: cp.gfg.hard || 0 },
-            codingScore:   cp.gfg.score    || 0,
-            currentStreak: cp.gfg.streak   || 0,
-            maxStreak:     cp.gfg.maxStreak || 0,
-            _source: "codolio",
-          };
-        }
-
-        if (cp.hackerrank) {
-          newData.hackerrank = {
-            platform: "HackerRank",
-            username: "harishvardhanwd",
-            profileUrl: "https://www.hackerrank.com/profile/harishvardhanwd",
-            solved: { total: cp.hackerrank.total || 0 },
-            totalBadges: cp.hackerrank.badges || 0,
-            totalStars:  cp.hackerrank.stars  || 0,
-            _source: "codolio",
-          };
-        }
-
-        const csRaw = cp.codestudio || cp["code-studio"] || cp["code360"];
-        if (csRaw) {
-          newData.codestudio = {
-            platform: "CodeStudio",
-            username: "harishVardhan",
-            profileUrl: "https://www.naukri.com/code360/profile/harishVardhan",
-            solved: { total: csRaw.total || 0 },
-            rating:     csRaw.score  || csRaw.rating || 0,
-            globalRank: csRaw.rank   || null,
-            _source: "codolio",
-          };
-        }
-      }
-
-      // ── Fallbacks so featured cards always render ────────────────────────────
-      if (!newData.leetcode)   newData.leetcode   = MOCK_LEETCODE;
-      if (!newData.codeforces) newData.codeforces = MOCK_CODEFORCES;
-      if (!newData.hackerrank) newData.hackerrank = MOCK_HACKERRANK;
-
-      setPlatformData(newData);
-      setLoading(false);
-    };
-    fetchAll();
-  }, []);
-
-  // eslint-disable-next-line no-unused-vars
-  const otherPlatforms = ["gfg", "codestudio"];
-  // eslint-disable-next-line no-unused-vars
-  const featuredPlatforms = ["codechef", "leetcode", "codeforces", "gfg", "hackerrank", "codestudio"];
-
-  return (
-    <div
-      id="coding"
-      style={{
-        minHeight: "100vh",
-      background: "#060810",
-      backgroundImage:
-        "radial-gradient(ellipse at 15% 15%,#120800 0%,transparent 50%)," +
-        "radial-gradient(ellipse at 85% 85%,#001208 0%,transparent 50%)",
-      padding: "0 0 80px",
-      fontFamily: "'JetBrains Mono','Fira Code',monospace",
-    }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap');
-        @keyframes shimmer  { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        @keyframes livePulse{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
-        @keyframes fadeUp   { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
-        *{box-sizing:border-box;margin:0;padding:0;}
-      `}</style>
-
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <div style={{
-        textAlign: "center", padding: "64px 24px 48px",
-        opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(20px)",
-        transition: "all 0.8s ease",
-      }}>
-        <div style={{ position: "relative", display: "inline-block", marginBottom: 22 }}>
-          <div style={{
-            width: 84, height: 84, borderRadius: "50%",
-            background: "linear-gradient(135deg,#C17A3530,#FFA11625,#2DB52620)",
-            border: "2px solid #C17A3545",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 30, fontFamily: "'Syne',sans-serif", color: "#f0ddb0",
-          }}>HV</div>
-          <div style={{ position: "absolute", bottom: 2, right: 2, width: 18, height: 18, background: "#2DB526", borderRadius: "50%", border: "3px solid #060810" }} />
-        </div>
-        <h1 style={{
-          fontSize: "clamp(26px,5vw,52px)", fontWeight: 900,
-          fontFamily: "'Syne',sans-serif", color: "#f0ece4",
-          letterSpacing: "-0.03em", lineHeight: 1.05, marginBottom: 9,
-        }}>Harish Vardhan D</h1>
-        <p style={{ color: "#94a3b8", fontSize: 14, letterSpacing: "0.2em", marginBottom: 5 }}>
-          COIMBATORE INSTITUTE OF TECHNOLOGY
-        </p>
-        <p style={{ color: "#94a3b8", fontSize: 16, letterSpacing: "0.14em" }}>
-          COIMBATORE, INDIA · COMPETITIVE PROGRAMMER
-        </p>
-      </div>
-
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 18px" }}>
-
-        {/* ── SUMMARY (commented out) ───────────────────────────────────────
-        <SummaryBanner platformData={platformData} loading={loading} mounted={mounted} />
-        ── END SUMMARY ──────────────────────────────────────────────────────── */}
-
-        {/* ── FEATURED CARDS: LeetCode + Codeforces only ─ */}
-        <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.2em", marginBottom: 12, fontFamily: "'JetBrains Mono',monospace" }}>
-          ▸ FEATURED · DETAILED LIVE CARDS
-        </div>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "repeat(2,1fr)",
-          gap: 16, marginBottom: 28,
-          alignItems: "stretch",
-        }}>
-          {/* LeetCode */}
-          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(22px)", transition: "all 0.7s ease 0.2s", display: "flex", flexDirection: "column" }}>
-            {loading
-              ? <PendingCard platform={HARISH_DATA.leetcode} pkey="leetcode" meta={PLATFORM_META.leetcode} />
-              : <LeetCodeCard data={platformData.leetcode || MOCK_LEETCODE} meta={PLATFORM_META.leetcode} />
-            }
-          </div>
-
-          {/* Codeforces */}
-          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(22px)", transition: "all 0.7s ease 0.3s", display: "flex", flexDirection: "column" }}>
-            {loading
-              ? <PendingCard platform={HARISH_DATA.codeforces} pkey="codeforces" meta={PLATFORM_META.codeforces} />
-              : <CodeforcesCard data={platformData.codeforces || MOCK_CODEFORCES} meta={PLATFORM_META.codeforces} />
-            }
-          </div>
-
-          {/* CodeChef — commented out
-          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(22px)", transition: "all 0.7s ease 0.4s" }}>
-            <CodeChefCard data={HARISH_DATA.codechef} meta={PLATFORM_META.codechef} />
-          </div>
-          */}
-
-          {/* GeeksforGeeks — commented out
-          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(22px)", transition: "all 0.7s ease 0.5s" }}>
-            {platformData.gfg
-              ? <GenericLiveCard data={platformData.gfg} pkey="gfg" meta={PLATFORM_META.gfg} />
-              : <PendingCard platform={HARISH_DATA.gfg} pkey="gfg" meta={PLATFORM_META.gfg} />
-            }
-          </div>
-          */}
-
-          {/* HackerRank — commented out
-          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(22px)", transition: "all 0.7s ease 0.6s" }}>
-            {loading
-              ? <PendingCard platform={HARISH_DATA.hackerrank} pkey="hackerrank" meta={PLATFORM_META.hackerrank} />
-              : <HackerRankCard data={platformData.hackerrank || MOCK_HACKERRANK} meta={PLATFORM_META.hackerrank} />
-            }
-          </div>
-          */}
-
-          {/* CodeStudio — commented out
-          <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(22px)", transition: "all 0.7s ease 0.7s" }}>
-            {platformData.codestudio
-              ? <GenericLiveCard data={platformData.codestudio} pkey="codestudio" meta={PLATFORM_META.codestudio} />
-              : <PendingCard platform={HARISH_DATA.codestudio} pkey="codestudio" meta={PLATFORM_META.codestudio} />
-            }
-          </div>
-          */}
-        </div>
-
-        {/* ── OTHER PLATFORM LINKS ─────────────────────────────────────────── */}
-        <div style={{ fontSize: 14, color: "#94a3b8", letterSpacing: "0.2em", marginBottom: 14, fontFamily: "'JetBrains Mono',monospace" }}>
-          ▸ OTHER PROFILES
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 28 }}>
-          {[
-            { key: "codechef",   label: "CodeChef",      url: HARISH_DATA.codechef.profileUrl   },
-            { key: "gfg",        label: "GeeksforGeeks", url: HARISH_DATA.gfg.profileUrl        },
-            { key: "hackerrank", label: "HackerRank",    url: HARISH_DATA.hackerrank.profileUrl },
-            { key: "codestudio", label: "CodeStudio",    url: HARISH_DATA.codestudio.profileUrl },
-          ].map(({ key, label, url }) => {
-            const m = PLATFORM_META[key];
-            return (
-              <a key={key} href={url} target="_blank" rel="noopener noreferrer" style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: `${m.color}0e`, border: `1px solid ${m.color}30`,
-                color: m.color, borderRadius: 10, padding: "10px 18px",
-                textDecoration: "none", fontSize: 14,
-                fontFamily: "'Syne',sans-serif", fontWeight: 700,
-                transition: "all 0.3s ease",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = `${m.color}18`; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = `${m.color}0e`; e.currentTarget.style.transform = "none"; }}
-              >
-                <span style={{
-                  width: 22, height: 22, borderRadius: 6,
-                  background: `${m.color}22`, border: `1px solid ${m.color}40`,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, fontFamily: "'JetBrains Mono',monospace", fontWeight: 800,
-                }}>{m.text}</span>
-                {label} ↗
-              </a>
-            );
-          })}
-        </div>
-
-        {/* ── FOOTER DISCLAIMER ────────────────────────────────────────────── */}
-        {/*
-        <div style={{
-          marginTop: 40, padding: "16px 20px", borderRadius: 12,
-          background: "#08090f", border: "1px solid #0f1520",
-          textAlign: "center", fontSize: 14, color: "#64748b",
-          fontFamily: "'JetBrains Mono',monospace", lineHeight: 2, letterSpacing: "0.08em",
-        }}>
-          Statistics are fetched from publicly available profile data and cached periodically.<br />
-          LeetCode & Codeforces: direct APIs · GFG, HackerRank, CodeStudio: via Codolio (Yugen27)<br />
-          Backend: <span style={{ color: "#94a3b8" }}>npm start  →  :4000</span> ·
-          Codolio / CodeStudio requires <span style={{ color: "#94a3b8" }}>USE_PUPPETEER=true</span>
-        </div>
-        */}
-      </div>
-    </div>
+    </section>
   );
 }
