@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-22T07:17:29.719Z",
+  "generatedAt": "2026-11-22T19:54:53.161Z",
   "leetcode": {
     "platform": "LeetCode",
     "username": "HarishVardhan27",
     "profileUrl": "https://leetcode.com/u/HarishVardhan27/",
     "solved": {
-      "total": 882,
-      "easy": 341,
+      "total": 883,
+      "easy": 342,
       "medium": 462,
       "hard": 79
     },
@@ -15,7 +15,7 @@
       "medium": "98.9",
       "hard": "95.6"
     },
-    "globalRanking": 53997,
+    "globalRanking": 53308,
     "reputation": 0,
     "country": "India",
     "contest": {
@@ -43,7 +43,7 @@
       "Daily Coding Challenge"
     ],
     "activeBadge": "Daily Coding Challenge",
-    "lastUpdated": "2026-11-22T07:17:29.369Z"
+    "lastUpdated": "2026-11-22T19:54:52.740Z"
   },
   "codeforces": {
     "platform": "Codeforces",
@@ -70,7 +70,7 @@
       "maxRatingGain": 403,
       "maxRatingDrop": -112
     },
-    "lastUpdated": "2026-11-22T07:17:29.120Z"
+    "lastUpdated": "2026-11-22T19:54:52.512Z"
   },
   "codechef": {
     "platform": "CodeChef",
@@ -86,7 +86,7 @@
     "solved": {
       "total": 62
     },
-    "lastUpdated": "2026-11-22T07:17:29.352Z"
+    "lastUpdated": "2026-11-22T19:54:52.596Z"
   },
   "gfg": {
     "platform": "GeeksforGeeks",
@@ -102,7 +102,7 @@
     "codingScore": 750,
     "instituteRank": 28,
     "maxStreak": 2,
-    "lastUpdated": "2026-11-22T07:17:29.546Z"
+    "lastUpdated": "2026-11-22T19:54:53.008Z"
   },
   "hackerrank": {
     "platform": "HackerRank",
@@ -147,7 +147,7 @@
     "solved": {
       "total": 162
     },
-    "lastUpdated": "2026-11-22T07:17:29.188Z"
+    "lastUpdated": "2026-11-22T19:54:52.492Z"
   },
   "codestudio": {
     "platform": "CodeStudio",
@@ -165,7 +165,7 @@
     "badges": [
       "Arrays achiever"
     ],
-    "lastUpdated": "2026-11-22T07:17:29.685Z"
+    "lastUpdated": "2026-11-22T19:54:53.052Z"
   },
   "atcoder": {
     "platform": "AtCoder",
@@ -173,14 +173,14 @@
     "profileUrl": "https://atcoder.jp/users/HarishVardhan27",
     "rating": 151,
     "highestRating": 151,
-    "rank": 55199,
-    "topPercent": "44.07",
+    "rank": 54865,
+    "topPercent": "43.8",
     "ratedContests": 3,
     "bestPerformance": 762,
     "lastCompeted": "2026/11/21",
     "solved": {
       "total": 9
     },
-    "lastUpdated": "2026-11-22T07:17:29.719Z"
+    "lastUpdated": "2026-11-22T19:54:53.161Z"
   }
 }
