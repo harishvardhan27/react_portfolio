@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-22T19:54:53.161Z",
+  "generatedAt": "2026-11-23T08:00:04.992Z",
   "leetcode": {
     "platform": "LeetCode",
     "username": "HarishVardhan27",
@@ -43,7 +43,7 @@
       "Daily Coding Challenge"
     ],
     "activeBadge": "Daily Coding Challenge",
-    "lastUpdated": "2026-11-22T19:54:52.740Z"
+    "lastUpdated": "2026-11-23T08:00:04.665Z"
   },
   "codeforces": {
     "platform": "Codeforces",
@@ -70,7 +70,7 @@
       "maxRatingGain": 403,
       "maxRatingDrop": -112
     },
-    "lastUpdated": "2026-11-22T19:54:52.512Z"
+    "lastUpdated": "2026-11-23T08:00:04.431Z"
   },
   "codechef": {
     "platform": "CodeChef",
@@ -86,7 +86,7 @@
     "solved": {
       "total": 62
     },
-    "lastUpdated": "2026-11-22T19:54:52.596Z"
+    "lastUpdated": "2026-11-23T08:00:04.647Z"
   },
   "gfg": {
     "platform": "GeeksforGeeks",
@@ -102,7 +102,7 @@
     "codingScore": 750,
     "instituteRank": 28,
     "maxStreak": 2,
-    "lastUpdated": "2026-11-22T19:54:53.008Z"
+    "lastUpdated": "2026-11-23T08:00:04.803Z"
   },
   "hackerrank": {
     "platform": "HackerRank",
@@ -147,7 +147,7 @@
     "solved": {
       "total": 162
     },
-    "lastUpdated": "2026-11-22T19:54:52.492Z"
+    "lastUpdated": "2026-11-23T08:00:04.469Z"
   },
   "codestudio": {
     "platform": "CodeStudio",
@@ -165,7 +165,7 @@
     "badges": [
       "Arrays achiever"
     ],
-    "lastUpdated": "2026-11-22T19:54:53.052Z"
+    "lastUpdated": "2026-11-23T08:00:04.992Z"
   },
   "atcoder": {
     "platform": "AtCoder",
@@ -174,13 +174,13 @@
     "rating": 151,
     "highestRating": 151,
     "rank": 54865,
-    "topPercent": "43.8",
+    "topPercent": "44.11",
     "ratedContests": 3,
     "bestPerformance": 762,
     "lastCompeted": "2026/11/21",
     "solved": {
       "total": 9
     },
-    "lastUpdated": "2026-11-22T19:54:53.161Z"
+    "lastUpdated": "2026-11-23T08:00:04.920Z"
   }
 }
