@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-23T08:00:04.992Z",
+  "generatedAt": "2026-11-24T00:11:43.747Z",
   "leetcode": {
     "platform": "LeetCode",
     "username": "HarishVardhan27",
     "profileUrl": "https://leetcode.com/u/HarishVardhan27/",
     "solved": {
-      "total": 883,
+      "total": 884,
       "easy": 342,
-      "medium": 462,
+      "medium": 463,
       "hard": 79
     },
     "beats": {
@@ -15,7 +15,7 @@
       "medium": "98.9",
       "hard": "95.6"
     },
-    "globalRanking": 53308,
+    "globalRanking": 53168,
     "reputation": 0,
     "country": "India",
     "contest": {
@@ -43,7 +43,7 @@
       "Daily Coding Challenge"
     ],
     "activeBadge": "Daily Coding Challenge",
-    "lastUpdated": "2026-11-23T08:00:04.665Z"
+    "lastUpdated": "2026-11-24T00:11:42.436Z"
   },
   "codeforces": {
     "platform": "Codeforces",
@@ -70,7 +70,7 @@
       "maxRatingGain": 403,
       "maxRatingDrop": -112
     },
-    "lastUpdated": "2026-11-23T08:00:04.431Z"
+    "lastUpdated": "2026-11-24T00:11:42.221Z"
   },
   "codechef": {
     "platform": "CodeChef",
@@ -84,9 +84,9 @@
     "countryRank": 22809,
     "contests": 15,
     "solved": {
-      "total": 62
+      "total": 66
     },
-    "lastUpdated": "2026-11-23T08:00:04.647Z"
+    "lastUpdated": "2026-11-24T00:11:42.373Z"
   },
   "gfg": {
     "platform": "GeeksforGeeks",
@@ -102,7 +102,7 @@
     "codingScore": 750,
     "instituteRank": 28,
     "maxStreak": 2,
-    "lastUpdated": "2026-11-23T08:00:04.803Z"
+    "lastUpdated": "2026-11-24T00:11:42.502Z"
   },
   "hackerrank": {
     "platform": "HackerRank",
@@ -147,7 +147,7 @@
     "solved": {
       "total": 162
     },
-    "lastUpdated": "2026-11-23T08:00:04.469Z"
+    "lastUpdated": "2026-11-24T00:11:42.230Z"
   },
   "codestudio": {
     "platform": "CodeStudio",
@@ -165,7 +165,7 @@
     "badges": [
       "Arrays achiever"
     ],
-    "lastUpdated": "2026-11-23T08:00:04.992Z"
+    "lastUpdated": "2026-11-24T00:11:42.862Z"
   },
   "atcoder": {
     "platform": "AtCoder",
@@ -181,6 +181,6 @@
     "solved": {
       "total": 9
     },
-    "lastUpdated": "2026-11-23T08:00:04.920Z"
+    "lastUpdated": "2026-11-24T00:11:43.747Z"
   }
 }
