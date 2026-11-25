@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-11-24T22:41:14.369Z",
+  "generatedAt": "2026-11-25T21:55:24.835Z",
   "leetcode": {
     "platform": "LeetCode",
     "username": "HarishVardhan27",
     "profileUrl": "https://leetcode.com/u/HarishVardhan27/",
     "solved": {
-      "total": 885,
+      "total": 886,
       "easy": 343,
       "medium": 463,
-      "hard": 79
+      "hard": 80
     },
     "beats": {
       "easy": "99.5",
       "medium": "98.9",
-      "hard": "95.6"
+      "hard": "95.7"
     },
-    "globalRanking": 53027,
+    "globalRanking": 52892,
     "reputation": 0,
     "country": "India",
     "contest": {
-      "attended": 33,
-      "rating": 2053,
-      "globalRank": 17097,
-      "topPercentage": "1.99",
+      "attended": 34,
+      "rating": 2069,
+      "globalRank": 15774,
+      "topPercentage": "1.84",
       "badge": "Knight"
     },
     "badges": [
@@ -43,7 +43,7 @@
       "Daily Coding Challenge"
     ],
     "activeBadge": "Daily Coding Challenge",
-    "lastUpdated": "2026-11-24T22:41:13.633Z"
+    "lastUpdated": "2026-11-25T21:55:23.940Z"
   },
   "codeforces": {
     "platform": "Codeforces",
@@ -70,23 +70,23 @@
       "maxRatingGain": 403,
       "maxRatingDrop": -112
     },
-    "lastUpdated": "2026-11-24T22:41:13.479Z"
+    "lastUpdated": "2026-11-25T21:55:23.555Z"
   },
   "codechef": {
     "platform": "CodeChef",
     "username": "harish_vardhan",
     "profileUrl": "https://www.codechef.com/users/harish_vardhan",
-    "rating": 1509,
+    "rating": 1453,
     "highestRating": 1651,
     "stars": 2,
     "division": "Div 3",
-    "globalRank": 24163,
-    "countryRank": 22809,
-    "contests": 15,
+    "globalRank": 31927,
+    "countryRank": 30343,
+    "contests": 16,
     "solved": {
-      "total": 66
+      "total": 68
     },
-    "lastUpdated": "2026-11-24T22:41:13.651Z"
+    "lastUpdated": "2026-11-25T21:55:23.755Z"
   },
   "gfg": {
     "platform": "GeeksforGeeks",
@@ -102,7 +102,7 @@
     "codingScore": 750,
     "instituteRank": 28,
     "maxStreak": 2,
-    "lastUpdated": "2026-11-24T22:41:13.660Z"
+    "lastUpdated": "2026-11-25T21:55:24.086Z"
   },
   "hackerrank": {
     "platform": "HackerRank",
@@ -147,7 +147,7 @@
     "solved": {
       "total": 162
     },
-    "lastUpdated": "2026-11-24T22:41:13.463Z"
+    "lastUpdated": "2026-11-25T21:55:23.585Z"
   },
   "codestudio": {
     "platform": "CodeStudio",
@@ -165,7 +165,7 @@
     "badges": [
       "Arrays achiever"
     ],
-    "lastUpdated": "2026-11-24T22:41:14.369Z"
+    "lastUpdated": "2026-11-25T21:55:24.835Z"
   },
   "atcoder": {
     "platform": "AtCoder",
@@ -181,6 +181,6 @@
     "solved": {
       "total": 9
     },
-    "lastUpdated": "2026-11-24T22:41:13.977Z"
+    "lastUpdated": "2026-11-25T21:55:24.331Z"
   }
 }
