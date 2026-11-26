@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-25T21:55:24.835Z",
+  "generatedAt": "2026-11-26T21:49:49.358Z",
   "leetcode": {
     "platform": "LeetCode",
     "username": "HarishVardhan27",
     "profileUrl": "https://leetcode.com/u/HarishVardhan27/",
     "solved": {
-      "total": 886,
-      "easy": 343,
+      "total": 887,
+      "easy": 344,
       "medium": 463,
       "hard": 80
     },
@@ -15,7 +15,7 @@
       "medium": "98.9",
       "hard": "95.7"
     },
-    "globalRanking": 52892,
+    "globalRanking": 52741,
     "reputation": 0,
     "country": "India",
     "contest": {
@@ -43,7 +43,7 @@
       "Daily Coding Challenge"
     ],
     "activeBadge": "Daily Coding Challenge",
-    "lastUpdated": "2026-11-25T21:55:23.940Z"
+    "lastUpdated": "2026-11-26T21:49:48.887Z"
   },
   "codeforces": {
     "platform": "Codeforces",
@@ -70,7 +70,7 @@
       "maxRatingGain": 403,
       "maxRatingDrop": -112
     },
-    "lastUpdated": "2026-11-25T21:55:23.555Z"
+    "lastUpdated": "2026-11-26T21:49:48.619Z"
   },
   "codechef": {
     "platform": "CodeChef",
@@ -86,7 +86,7 @@
     "solved": {
       "total": 68
     },
-    "lastUpdated": "2026-11-25T21:55:23.755Z"
+    "lastUpdated": "2026-11-26T21:49:48.759Z"
   },
   "gfg": {
     "platform": "GeeksforGeeks",
@@ -102,7 +102,7 @@
     "codingScore": 750,
     "instituteRank": 28,
     "maxStreak": 2,
-    "lastUpdated": "2026-11-25T21:55:24.086Z"
+    "lastUpdated": "2026-11-26T21:49:49.005Z"
   },
   "hackerrank": {
     "platform": "HackerRank",
@@ -147,7 +147,7 @@
     "solved": {
       "total": 162
     },
-    "lastUpdated": "2026-11-25T21:55:23.585Z"
+    "lastUpdated": "2026-11-26T21:49:48.667Z"
   },
   "codestudio": {
     "platform": "CodeStudio",
@@ -165,7 +165,7 @@
     "badges": [
       "Arrays achiever"
     ],
-    "lastUpdated": "2026-11-25T21:55:24.835Z"
+    "lastUpdated": "2026-11-26T21:49:49.358Z"
   },
   "atcoder": {
     "platform": "AtCoder",
@@ -181,6 +181,6 @@
     "solved": {
       "total": 9
     },
-    "lastUpdated": "2026-11-25T21:55:24.331Z"
+    "lastUpdated": "2026-11-26T21:49:49.353Z"
   }
 }
