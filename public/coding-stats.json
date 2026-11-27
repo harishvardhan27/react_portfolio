@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-26T21:49:49.358Z",
+  "generatedAt": "2026-11-27T21:33:11.256Z",
   "leetcode": {
     "platform": "LeetCode",
     "username": "HarishVardhan27",
@@ -15,7 +15,7 @@
       "medium": "98.9",
       "hard": "95.7"
     },
-    "globalRanking": 52741,
+    "globalRanking": 52597,
     "reputation": 0,
     "country": "India",
     "contest": {
@@ -43,7 +43,7 @@
       "Daily Coding Challenge"
     ],
     "activeBadge": "Daily Coding Challenge",
-    "lastUpdated": "2026-11-26T21:49:48.887Z"
+    "lastUpdated": "2026-11-27T21:33:11.256Z"
   },
   "codeforces": {
     "platform": "Codeforces",
@@ -70,7 +70,7 @@
       "maxRatingGain": 403,
       "maxRatingDrop": -112
     },
-    "lastUpdated": "2026-11-26T21:49:48.619Z"
+    "lastUpdated": "2026-11-27T21:33:07.723Z"
   },
   "codechef": {
     "platform": "CodeChef",
@@ -86,7 +86,7 @@
     "solved": {
       "total": 68
     },
-    "lastUpdated": "2026-11-26T21:49:48.759Z"
+    "lastUpdated": "2026-11-27T21:33:07.943Z"
   },
   "gfg": {
     "platform": "GeeksforGeeks",
@@ -102,7 +102,7 @@
     "codingScore": 750,
     "instituteRank": 28,
     "maxStreak": 2,
-    "lastUpdated": "2026-11-26T21:49:49.005Z"
+    "lastUpdated": "2026-11-27T21:33:08.666Z"
   },
   "hackerrank": {
     "platform": "HackerRank",
@@ -147,7 +147,7 @@
     "solved": {
       "total": 162
     },
-    "lastUpdated": "2026-11-26T21:49:48.667Z"
+    "lastUpdated": "2026-11-27T21:33:07.731Z"
   },
   "codestudio": {
     "platform": "CodeStudio",
@@ -165,7 +165,7 @@
     "badges": [
       "Arrays achiever"
     ],
-    "lastUpdated": "2026-11-26T21:49:49.358Z"
+    "lastUpdated": "2026-11-27T21:33:08.258Z"
   },
   "atcoder": {
     "platform": "AtCoder",
@@ -181,6 +181,6 @@
     "solved": {
       "total": 9
     },
-    "lastUpdated": "2026-11-26T21:49:49.353Z"
+    "lastUpdated": "2026-11-27T21:33:08.351Z"
   }
 }
